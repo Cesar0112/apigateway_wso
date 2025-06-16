@@ -1,92 +1,86 @@
-# ApiGateway_wso
+# Pasos siguientes recomendados para robustecer el API Gateway
 
+## 1. Validación y limpieza de sesión
 
+- **Destruir la sesión correctamente:**  
+  Asegúrate de que la sesión se destruya tanto al hacer logout como cuando el token expire (esto ya lo gestiona el guard).
+- **Endpoint de estado de sesión:**  
+  Considera agregar un endpoint `/authenticate/status` que permita al frontend consultar si la sesión sigue activa y obtener información básica del usuario autenticado.
 
-## Getting started
+## 2. Mejorar la seguridad
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- **Cookies seguras:**  
+  Configura las cookies de sesión con `httpOnly: true` para evitar acceso desde JavaScript y `secure: true` para que solo se envíen por HTTPS en producción.
+- **Expiración de sesión:**  
+  Ajusta el parámetro `maxAge` de la cookie de sesión según el tiempo de inactividad permitido.
+- **Validación de firma JWT:**  
+  Si es posible, valida la firma del token JWT usando la clave pública de WSO2 para asegurarte de que no ha sido manipulado.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## 3. Auditoría y logs
 
-## Add your files
+- **Registrar eventos importantes:**  
+  Agrega logs para login, logout, expiración de sesión, intentos fallidos y cualquier acceso no autorizado.
+- **Monitoreo:**  
+  Considera integrar herramientas de monitoreo para detectar patrones sospechosos o problemas de seguridad.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## 4. Pruebas
 
-```
-cd existing_repo
-git remote add origin https://gitlab.xutil.cu/xetid/ub-inddig/ce-sfyso/apigateway_wso.git
-git branch -M main
-git push -uf origin main
-```
+- **Pruebas unitarias:**  
+  Escribe pruebas para los endpoints de autenticación, el guard y el interceptor de sesión.
+- **Pruebas de integración:**  
+  Simula el flujo completo: login, acceso a rutas protegidas, expiración de sesión y logout.
+- **Pruebas de seguridad:**  
+  Verifica que no se pueda acceder a rutas protegidas sin sesión válida y que el token no se exponga nunca al frontend.
 
-## Integrate with your tools
+## 5. Documentación
 
-- [ ] [Set up project integrations](https://gitlab.xutil.cu/xetid/ub-inddig/ce-sfyso/apigateway_wso/-/settings/integrations)
+- **Actualizar rutas:**  
+  Mantén el archivo `ROUTES.md` actualizado con todas las rutas y su propósito.
+- **Flujo de autenticación:**  
+  Documenta cómo funciona el proceso de login, manejo de sesión y protección de rutas para facilitar el onboarding de nuevos desarrolladores.
 
-## Collaborate with your team
+## 6. Manejo de errores
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+- **Mensajes claros:**  
+  Personaliza los mensajes de error para casos como expiración de sesión, token inválido o falta de permisos.
+- **Respuestas consistentes:**  
+  Asegúrate de que el frontend reciba respuestas claras y estructuradas para cada caso de error.
 
-## Test and Deploy
+## 7. Revisión de permisos
 
-Use the built-in continuous integration in GitLab.
+- **Control de acceso:**  
+  Si tu aplicación usa permisos, revisa que se apliquen correctamente en los endpoints que lo requieran, usando guards adicionales si es necesario.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+---
 
-***
+# Apartado: Flujo de negocio recomendado
 
-# Editing this README
+## Flujo general de la aplicación
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+1. **El frontend nunca maneja tokens ni datos sensibles.**
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+   - El usuario solo interactúa con la interfaz y envía peticiones (por ejemplo, login, acciones, consultas) al backend a través de la API Gateway.
 
-## Name
-Choose a self-explaining name for your project.
+2. **El frontend hace todas las peticiones a través de la API Gateway.**
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+   - Ejemplo: `/apigateway/monitoring`, `/apigateway/users`, etc.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+3. **La API Gateway valida todo:**
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+   - **Sesión:** Verifica que la sesión esté activa y el token no haya expirado.
+   - **Permisos:** Verifica que el usuario tenga permisos para la acción solicitada.
+   - **Autorización:** Si el usuario no tiene permisos o la sesión no es válida, responde con error (401 o 403).
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+4. **El backend nunca expone el token ni datos sensibles al frontend.**
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+   - Solo responde con información relevante para la UI (por ejemplo, éxito, error, datos de negocio, permisos si es necesario para mostrar u ocultar opciones).
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+5. **El frontend solo reacciona a la respuesta del backend.**
+   - Si la respuesta es exitosa, muestra la información o redirige.
+   - Si hay error de sesión o permisos, muestra un mensaje o redirige al login.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## Ventajas de este flujo
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- **Seguridad:** El token y la sesión nunca salen del backend.
+- **Centralización:** Todas las reglas de negocio, permisos y sesiones se controlan en un solo lugar.
+- **Simplicidad en el frontend:** El frontend solo se preocupa por mostrar información y reaccionar a respuestas.
