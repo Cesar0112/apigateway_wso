@@ -1,7 +1,7 @@
 // Archivo: permissions.actions.types.ts
 // Enums de acciones para cada recurso del sistema
 
-export enum CameraAction {
+export enum MonitoringAction {
   Add = 'add',
   Update = 'update',
   Delete = 'delete',
@@ -12,7 +12,7 @@ export enum CameraAction {
   OpenWebPage = 'open_web_page',
   CheckConnection = 'check_connection',
   Search = 'search',
-  Monitor = 'monitor',
+  Monitor = 'select_monitor',
   Control = 'control',
   Presentation = 'presentation',
 }
@@ -37,7 +37,7 @@ export enum RecordingAction {
   /*Configure = 'configure',
   View = 'view',*/
   Statistics = 'statistics',
-  Record = 'record',
+  Play = 'playing',
 }
 
 export enum ViewAction {
@@ -59,23 +59,29 @@ export enum EventAction {
 export enum LogAction {
   Search = 'search',
 }
+export enum SessionAction {
+  View = 'internal_session_view',
+  Delete = 'internal_session_delete',        
+}
 
 export enum UserAction {
-  Add = 'add',
-  Update = 'update',
-  Delete = 'delete',
+  Create = 'internal_user_mgt_create',
+  Update = 'internal_user_mgt_update',
+  Delete = 'internal_user_mgt_delete',
   AssignRole = 'assign_role',
   ChangePassword = 'change_password',
   Activate = 'activate',
   Deactivate = 'deactivate',
   Filter = 'filter',
+  List = 'internal_user_mgt_list',
+  View = 'internal_user_mgt_view',
 }
-
+//Estos permisos no están todavía asignados a nada en wintelli web ya que los roles no se gestionan
 export enum RoleAction {
-  Add = 'add',
-  Update = 'update',
-  Delete = 'delete',
-  Get = 'get',
+  Add = 'internal_role_mgt_create',
+  Update = 'internal_role_mgt_update',
+  Delete = 'internal_role_mgt_delete',
+  View = 'internal_role_mgt_view',
 }
 
 export enum ServerAction {
@@ -88,7 +94,7 @@ export enum ServerAction {
   ManageAutoRule = 'manage_auto_rule',
   ManageSubsystem = 'manage_subsystem',
 }
-
+//Estos permisos faltan asignarse a la lista de RFs
 export enum StructureAction {
   Add = 'add',
   Update = 'update',

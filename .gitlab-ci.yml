@@ -1,49 +1,79 @@
-# This file is a template, and might need editing before it works on your project.
-# This is a sample GitLab CI/CD configuration file that should run without any modifications.
-# It demonstrates a basic 3 stage CI/CD pipeline. Instead of real tests or scripts,
-# it uses echo commands to simulate the pipeline execution.
-#
-# A pipeline is composed of independent jobs that run scripts, grouped into stages.
-# Stages run in sequential order, but jobs within stages run in parallel.
-#
-# For more information, see: https://docs.gitlab.com/ee/ci/yaml/index.html#stages
-#
-# You can copy and paste this template into a new `.gitlab-ci.yml` file.
-# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
-#
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
+image: node:22.16.0
 
-stages:          # List of stages for jobs, and their order of execution
+stages:
   - build
-  - test
+  #- test
   - deploy
 
-build-job:       # This job runs in the build stage, which runs first.
+cache:
+  paths:
+    - node_modules/
+    - package-lock.json
+    - package.json
+    - yarn.lock
+    - dist/
+
+install_dependencies:
   stage: build
+  before_script:
+    # Configura el proxy para npm
+    - npm --global install yarn
+    - yarn config set save-exact false
+    - yarn set proxy http://cfernandezg:01122666547@10.12.0.205:3128
+    - yarn config set https-proxy http://cfernandezg:01122666547@10.12.0.205:3128
+    - export NODE_ENV=development
+    # Actualiza sources.list
+    - echo "Actualizando /etc/apt/sources.list..."
+    - echo "deb http://ubuntu.uci.cu/ubuntu/ xenial main restricted universe multiverse" > /etc/apt/sources.list
+    - echo "deb http://ubuntu.uci.cu/ubuntu/ xenial-backports main restricted universe multiverse" >> /etc/apt/sources.list
+    - echo "deb http://ubuntu.uci.cu/ubuntu/ xenial-proposed main restricted universe multiverse" >> /etc/apt/sources.list
+    - echo "deb http://ubuntu.uci.cu/ubuntu/ xenial-security main restricted universe multiverse" >> /etc/apt/sources.list
+    - echo "deb http://ubuntu.uci.cu/ubuntu/ xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list
+    - cat /etc/apt/sources.list
+    # Configuro el proxy para apt
+    - echo "Configurando proxy"
+    - echo 'Acquire::http::Proxy "http://cfernandezg:01122666547@10.12.0.205:3128";' > /etc/apt/apt.conf.d/99HttpProxy
+    - echo 'Acquire::https::Proxy "http://cfernandezg:01122666547@10.12.0.205:3128";' >> /etc/apt/apt.conf.d/99HttpProxy
+    - cat /etc/apt/apt.conf.d/99HttpProxy
+    # Configura el proxy para curl y gpg
+    - export http_proxy="http://cfernandezg:01122666547@10.12.0.205:3128"
+    - export https_proxy="http://cfernandezg:01122666547@10.12.0.205:3128"
+    # Descarga e instala las claves necesarias usando curl y gpg
+    - curl -fsSL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x40976EAF437D05B5" | gpg --dearmor | tee /etc/apt/trusted.gpg.d/ubuntu-40976EAF437D05B5.gpg
+    - curl -fsSL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3B4FE6ACC0B21F32" | gpg --dearmor | tee /etc/apt/trusted.gpg.d/ubuntu-3B4FE6ACC0B21F32.gpg
+    - apt-get update && apt-get install -y sshpass
   script:
-    - echo "Compiling the code..."
-    - echo "Compile complete."
+    - clear
+    - echo "Install dependencies"
+    - yarn install --frozen-lockfile
+    - echo "Haciendo build ..."
+    - yarn run build
+    - docker build -t my-nestjs-app .
+    - mkdir -p ~/.ssh
+    - clear
+    - echo "Build terminado"
+    - echo "ssh-keyscan 10.12.24.206" > ~/.ssh/known_hosts
+    #Copia el archivo de mi backend en el servidor 206
+    - docker save my-nestjs-app | sshpass -p "digilante" ssh -o StrictHostKeyChecking=no digilante@10.12.24.206 'docker load'
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - dist/
 
-unit-test-job:   # This job runs in the test stage.
-  stage: test    # It only starts when the job in the build stage completes successfully.
+deploy_backend:
+  stage: deploy
+  environment: development
   script:
-    - echo "Running unit tests... This will take about 60 seconds."
-    - sleep 60
-    - echo "Code coverage is 90%"
-
-lint-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
-  script:
-    - echo "Linting code... This will take about 10 seconds."
-    - sleep 10
-    - echo "No lint issues found."
-
-deploy-job:      # This job runs in the deploy stage.
-  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
-  environment: production
-  script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
+    - echo "Desplegando contenedor en 10.12.24.206"
+    - sshpass -p "digilante" ssh -o StrictHostKeyChecking=no digilante@10.12.24.206 '
+      docker stop my-nestjs-app || true &&
+      docker rm my-nestjs-app || true &&
+      docker run -d \
+      --name my-nestjs-app \
+      --restart unless-stopped \
+      -p 10410:10410 \
+      -e NODE_ENV=production \
+      -e PORT=10410 \
+      my-nestjs-app'
+  only:
+    - main
