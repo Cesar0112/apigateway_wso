@@ -65,7 +65,7 @@ export class PermissionsService {
     }
     for (const role of rolesArray) {
       try {
-        const url: string = `${this.configService.get<string>('WSO2_HOST')}:${this.configService.get<string>('WSO2_PORT')}/scim2/${this.configService.get<string>('WSO2_API_VERSION')}/Roles/.search`;
+        const url: string = `${this.configService.get<string>('WSO2_URL')}/scim2/${this.configService.get<string>('WSO2_API_VERSION')}/Roles/.search`;
         const { data }: AxiosResponse<RoleSearchResponse> =
           await axios.post<RoleSearchResponse>(
             url,
@@ -82,6 +82,7 @@ export class PermissionsService {
                 Accept: 'application/scim+json',
               },
               httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+              proxy: false,
             },
           );
 

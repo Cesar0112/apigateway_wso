@@ -9,7 +9,7 @@ export class ScopeGuard implements CanActivate {
   /**
    * Método que verifica si el guard puede activar la ruta.
    * @param context - El contexto de ejecución.
-   * @returns Siempre retorna true, permitiendo el acceso a la ruta.
+   * @returns En dependencia de los permisos del usuario deja pasar o no.
    */
 
   canActivate(context: ExecutionContext): boolean {

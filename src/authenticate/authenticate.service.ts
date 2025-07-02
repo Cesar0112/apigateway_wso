@@ -9,6 +9,8 @@ import { WSO2TokenResponse, DecodedToken } from './authenticate.interface';
 import { ConfigService } from '@nestjs/config';
 import { EncryptionsService } from '../encryptions/encryptions.service';
 import { PermissionsService } from 'src/permissions/permissions.service';
+import { Agent as HttpsAgent } from 'https';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 @Injectable()
 export class AuthenticateService {
   constructor(
@@ -19,31 +21,40 @@ export class AuthenticateService {
 
   async login(user: string, password: string) {
     try {
-      const url =
-        this.configService.get<string>('WSO2_URL') ||
+      const url: string =
+        this.configService.get<string>('WSO2_URL_TOKEN') ??
         'https://localhost:9443/oauth2/token';
-      const response = await axios.post<WSO2TokenResponse>(
-        url,
-        qs.stringify({
-          grant_type: 'password',
-          client_id: this.configService.get<string>('WSO2_CLIENT_ID'),
-          client_secret: this.configService.get<string>('CLIENT_SECRET'),
-          username: user,
-          password: this.encryptionsService.decryptPassword(
-            password,
-            this.configService.get<string>('ENCRYPTION_PASSWORD') ??
-              'IkIopwlWorpqUj',
-          ),
-          scope: 'openid groups profile roles internal_role_mgt_view',
-        }),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          httpsAgent: new https.Agent({ rejectUnauthorized: false }), //TODO remove this in production
-          timeout: 5000, // Set a timeout of 5 seconds
-        },
-      );
+      const data = qs.stringify({
+        grant_type: 'password',
+        client_id: this.configService.get<string>('WSO2_CLIENT_ID'),
+        client_secret: this.configService.get<string>('CLIENT_SECRET'),
+        username: user,
+        password: this.encryptionsService.decryptPassword(
+          password,
+          this.configService.get<string>('ENCRYPTION_PASSWORD') ??
+            'IkIopwlWorpqUj',
+        ),
+        scope: 'openid groups profile roles internal_role_mgt_view',
+      });
+      const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      };
+      const proxyEnv =
+        this.configService.get('HTTPS_PROXY') ||
+        this.configService.get('https_proxy') ||
+        this.configService.get('HTTP_PROXY') ||
+        this.configService.get('http_proxy');
+
+      const httpsAgent = proxyEnv
+        ? new HttpsProxyAgent(proxyEnv)
+        : new HttpsAgent({ rejectUnauthorized: false }); // o true en producción
+
+      const response = await axios.post<WSO2TokenResponse>(url, data, {
+        proxy: false, //TODO Arreglar para entornos que viaje la petición a traves del proxy
+        headers,
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }), //TODO remove this in production
+        timeout: 5000, // Set a timeout of 5 seconds
+      });
       const token = response.data.access_token;
       const decodedToken: DecodedToken = jwt.jwtDecode(token);
 
@@ -91,7 +102,7 @@ export class AuthenticateService {
           message: 'Autenticación exitosa',
         };
       }
-    } catch {
+    } catch (error) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
   }

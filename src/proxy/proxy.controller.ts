@@ -10,18 +10,23 @@ import { Request, Response } from 'express';
 import { ProxyService } from './proxy.service';
 import { Channel } from './proxy.interface';
 import { SessionTokenGuard } from '../guards/session-token.guard';
+import { ProxyGateway } from './proxy.gateway';
 
 @Controller('*path')
 @UseGuards(SessionTokenGuard)
 export class ProxyController {
-  constructor(private readonly proxyService: ProxyService) {}
+  constructor(
+    private readonly proxyService: ProxyService,
+    private readonly gatewayService: ProxyGateway,
+  ) {}
 
   @All()
-  async handleAllRequests(@Req() req: Request, @Res() res: Response) {
+  async handleAllHTTPRequests(@Req() req: Request, @Res() res: Response) {
     try {
       //Determinar el canal dinámicamente
       const channel: Channel =
         (req.headers['x-channel'] as Channel) || Channel.HTTP;
+      console.log('Petición');
 
       const response = await this.proxyService.sendRequest(
         req.path,
