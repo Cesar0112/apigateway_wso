@@ -14,56 +14,63 @@ import { io as ClientIO } from 'socket.io-client';
     origin: 'http://localhost:8080', // Cambia por tu frontend
     credentials: true,
   },
-  //namespace: '/', // Gateway general
+  allowEIO3: true,
+  namespace: '/', // Gateway general
 })
 export class ProxyGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
+
   constructor(private readonly configService: ConfigService) {}
-  handleConnection(client: Socket) {
+
+  handleConnection(socket: Socket) {
+    const namespace = socket.nsp.name;
     // Para el namespace raíz
-    console.log(
-      'Nueva conexión socket:',
-      client.id,
-      'namespace:',
-      client.nsp.name,
-    );
-    const namespace = client.nsp.name;
-    this.setupProxy(client, namespace);
-  }
-
-  setupProxy(socket: Socket, namespace: string) {
-    // Conecta con el microservicio correspondiente según el namespace
+    console.log('Nueva conexión socket:', socket.id, 'namespace:', namespace);
     const url = this.configService.get<string>('API_URL');
-    console.log('URL', url);
 
-    const backendSocket = ClientIO(url);
+    const backendSocket = ClientIO(url, {
+      transports: ['polling', 'websocket', 'webtransport'],
+      secure: false,
+      rejectUnauthorized: false,
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      randomizationFactor: 0.5,
+    });
 
     // Redirige todos los eventos del cliente al backend
     socket.onAny((event, ...args) => {
-      backendSocket.emit(event, ...args);
+      try {
+        console.log('apigateway→backend:', event, args);
+        backendSocket.emit(event, ...args);
+      } catch (err) {
+        console.error('Error al emitir a backend:', err);
+      }
     });
 
     // Redirige todos los eventos del backend al cliente
     backendSocket.onAny((event, ...args) => {
-      socket.emit(event, ...args);
+      try {
+        console.log('backend→apigateway:', event, args);
+        socket.emit(event, ...args);
+      } catch (err) {
+        console.error('Error al emitir a apigateway:', err);
+      }
     });
-
-    // Maneja desconexión
-    socket.on('disconnect', () => {
+    const cleanup = () => {
       backendSocket.disconnect();
-    });
-  }
+      socket.disconnect(true);
+    };
+    // Maneja desconexión
+    socket.on('disconnect', cleanup);
 
-  getBackendUrlForNamespace(namespace: string): string {
-    // Aquí defines la lógica para mapear namespaces a URLs de microservicios
-    if (namespace === '/forensicSearch') {
-      return 'http://localhost:10410/forensicSearch';
-    }
-    if (namespace === '/otroNamespace') {
-      return 'http://10.12.24.38:10410/otroNamespace';
-    }
-    // Por defecto
-    return 'http://10.12.24.38:10410/';
+    backendSocket.on('disconnect', cleanup);
+
+    backendSocket.on('connect_error', (err) => {
+      console.error('Error backend:', err);
+      cleanup();
+    });
   }
 }
