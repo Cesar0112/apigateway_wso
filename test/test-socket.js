@@ -1,8 +1,8 @@
 const { io } = require('socket.io-client');
 
 // Cambia la URL al endpoint de tu API Gateway
-const socket = io('http://localhost:10410', {
-  path: '/', // Cambia si usas un path diferente
+const socket = io('http://localhost:10411', {
+  //path: '/apigateway/', // Cambia si usas un path diferente
   //transports: ['websocket'],
 });
 
