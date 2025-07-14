@@ -73,7 +73,7 @@ export class PermissionsService {
               filter: `displayName eq ${role}`,
               schemas: ['urn:ietf:params:scim:api:messages:2.0:SearchRequest'],
               startIndex: 1,
-              count: 10,
+              count: 1,
             },
             {
               headers: {

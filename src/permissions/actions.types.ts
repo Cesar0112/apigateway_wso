@@ -61,7 +61,7 @@ export enum LogAction {
 }
 export enum SessionAction {
   View = 'internal_session_view',
-  Delete = 'internal_session_delete',        
+  Delete = 'internal_session_delete',
 }
 
 export enum UserAction {

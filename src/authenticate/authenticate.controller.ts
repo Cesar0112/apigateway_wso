@@ -1,20 +1,12 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Req,
-  UsePipes,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Post, Body, Req, UsePipes, Session } from '@nestjs/common';
 import { AuthenticateService } from './authenticate.service';
 import { JoiValidationPipe } from 'src/pipes/password-grant/password-grant.pipe';
 import { UserPasswordSchema } from 'src/pipes/validation-schemas/userpassword';
-import { SetSessionInterceptor } from 'src/interceptors/set-session/set-session.interceptor';
 import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Request } from 'express';
-import { Session } from 'express-session';
+import { Session as se } from 'express-session';
 
-interface CustomSession extends Session {
+interface CustomSession extends se {
   accessToken?: string;
   user?: any;
   permissions?: string[];
@@ -28,18 +20,19 @@ interface RequestWithSession extends Request {
 export class AuthenticateController {
   constructor(private readonly authenticateService: AuthenticateService) {}
   @ApiTags('Autenticación')
-  @Post()
   @UsePipes(new JoiValidationPipe(UserPasswordSchema))
-  @UseInterceptors(SetSessionInterceptor)
   @ApiBody({ schema: { example: { user: 'usuario', password: 'contraseña' } } })
   @ApiResponse({ status: 200, description: 'Login exitoso' })
+  @Post()
   async login(
-    @Req() req: RequestWithSession,
+    @Session() session: Record<string, any>,
     @Body() body: { user: string; password: string },
   ): Promise<any> {
     const { user, password } = body;
 
     const result = await this.authenticateService.login(user, password);
+    session.accessToken = result?.token;
+    console.log('Session id', session.id);
 
     return {
       success: true,
@@ -48,8 +41,8 @@ export class AuthenticateController {
     };
   }
   @ApiTags('Desautenticación')
-  @Post('logout')
   @ApiResponse({ status: 200, description: 'Logout exitoso' })
+  @Post('logout')
   async logout(@Req() req: RequestWithSession): Promise<any> {
     if (!req.session.accessToken) {
       throw new Error('No active session found');

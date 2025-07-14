@@ -39,7 +39,7 @@ export class AuthenticateService {
       const headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
       };
-      const proxyEnv =
+      /*const proxyEnv =
         this.configService.get('HTTPS_PROXY') ||
         this.configService.get('https_proxy') ||
         this.configService.get('HTTP_PROXY') ||
@@ -48,12 +48,11 @@ export class AuthenticateService {
       const httpsAgent = proxyEnv
         ? new HttpsProxyAgent(proxyEnv)
         : new HttpsAgent({ rejectUnauthorized: false }); // o true en producción
-
+*/
       const response = await axios.post<WSO2TokenResponse>(url, data, {
         proxy: false, //TODO Arreglar para entornos que viaje la petición a traves del proxy
         headers,
         httpsAgent: new https.Agent({ rejectUnauthorized: false }), //TODO remove this in production
-        timeout: 5000, // Set a timeout of 5 seconds
       });
       const token = response.data.access_token;
       const decodedToken: DecodedToken = jwt.jwtDecode(token);

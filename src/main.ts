@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { environment } from './config';
 import * as session from 'express-session';
+import * as cookieParser from 'cookie-parser';
 import * as morgan from 'morgan';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
@@ -13,19 +14,13 @@ async function main() {
   dotenvExpand.expand(myEnv);
 
   console.log('Starting API Gateway...');
-  app.enableCors({
-    origin: 'http://localhost:8080', //TODO Cambiar por las URLs permitidas en producción
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allow specific HTTP methods
-    allowedHeaders: 'Content-Type, Accept, Authorization', // Allow specific headers
-    credentials: true, // Allow credentials
-  });
   app.use(
     session({
       secret: environment.SESSION_SECRET ?? 's3cr3t',
       resave: false, // Do not resave session if unmodified
       saveUninitialized: false, // Do not create session until something stored
       cookie: {
-        maxAge: /*24 * 60 * 60 */ 60 * 1000, // Set cookie expiration to 1 minute
+        maxAge: 24 * 60 * 60 * 1000, // Set cookie expiration to 1 day //TODO Cambiar por una variable de entorno
         secure: false, // Set to true if using HTTPS
         httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
       },
@@ -47,6 +42,13 @@ async function main() {
   console.log('API Gateway is running...');
   const port = environment.PORT ?? 3000;
   app.setGlobalPrefix('apigateway'); // Set global prefix for all routes
+  app.enableCors({
+    origin: 'http://localhost:8080', //TODO Cambiar por las URLs permitidas en producción
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allow specific HTTP methods
+    allowedHeaders: 'Content-Type, Accept, Authorization', // Allow specific headers
+    credentials: true, // Allow credentials
+  });
+  app.use(cookieParser()); // Use cookie parser middleware
   await app.listen(port);
   console.log('Listening on port:', port);
 }

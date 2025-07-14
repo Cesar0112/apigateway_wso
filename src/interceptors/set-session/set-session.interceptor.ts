@@ -19,7 +19,12 @@ export class SetSessionInterceptor implements NestInterceptor {
           req.session.user = data.user;
           req.session.permissions = data.user.permissions;
         }
-        return data;
+
+        const { token, ...publicData } = data;
+        // Return only the public data to the client
+        return {
+          ...publicData,
+        };
       }),
     );
   }

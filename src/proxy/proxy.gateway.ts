@@ -15,7 +15,7 @@ import { io as ClientIO } from 'socket.io-client';
     credentials: true,
   },
   allowEIO3: true,
-  namespace: '/', // Gateway general
+  namespace: /^\/\w+$/, // Gateway general
 })
 export class ProxyGateway implements OnGatewayConnection {
   @WebSocketServer()
