@@ -1,55 +1,67 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { environment } from './config';
+import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
+//import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'; // créalo si no existe
 import * as session from 'express-session';
 import * as cookieParser from 'cookie-parser';
 import * as morgan from 'morgan';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 async function main() {
+  // 1. Cargar variables de entorno
+  dotenvExpand.expand(dotenv.config());
   const app = await NestFactory.create(AppModule);
+  const cfg = app.get(ConfigService);
 
-  const myEnv = dotenv.config();
-  dotenvExpand.expand(myEnv);
+  if (process.env.NODE_ENV !== 'test') {
+    app.use(morgan('combined')); // Use morgan for logging HTTP requests
+  }
+  // 2. Middleware en orden logico
+  app.use(cookieParser()); // Use cookie parser middleware
 
-  console.log('Starting API Gateway...');
   app.use(
     session({
-      secret: environment.SESSION_SECRET ?? 's3cr3t',
+      secret: cfg.get<string>('SESSION_SECRET', 's3cr3t'),
       resave: false, // Do not resave session if unmodified
       saveUninitialized: false, // Do not create session until something stored
       cookie: {
-        maxAge: 24 * 60 * 60 * 1000, // Set cookie expiration to 1 day //TODO Cambiar por una variable de entorno
-        secure: false, // Set to true if using HTTPS
+        maxAge: cfg.get<number>('SESSION_MAX_AGE', 24 * 60 * 60 * 1000), // Default to 24 hours
+        secure: cfg.get<string>('NODE_ENV') === 'production', // Set to true if using HTTPS
         httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
       },
     }),
   );
-  app.use(morgan('dev')); // Use morgan for logging HTTP requests
+  // 3. Pipes & Filters globales
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  //app.useGlobalFilters(new AllExceptionsFilter());
 
-  const config = new DocumentBuilder()
+  //4 .Prefijo golbal
+  app.setGlobalPrefix('apigateway'); // Set global prefix for all routes
+
+  // 5. Documentación Swagger
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('API Gateway')
     .setDescription('API Gateway for Microservices')
     .setVersion('1.0')
-    .addTag('api-gateway')
     .addBearerAuth()
     .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-gateway/docs', app, document);
-  console.log('Swagger documentation available at /api-gateway/docs');
-  console.log('CORS enabled for all origins and methods');
-  console.log('API Gateway is running...');
-  const port = environment.PORT ?? 3000;
-  app.setGlobalPrefix('apigateway'); // Set global prefix for all routes
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('apigateway/docs', app, document);
   app.enableCors({
-    origin: 'http://localhost:8080', //TODO Cambiar por las URLs permitidas en producción
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allow specific HTTP methods
+    origin: cfg.get<string>('CORS_ORIGIN', 'http://localhost:8080').split(','), // Allow specific origins
+    methods: cfg.get<string>(
+      'HTTP_METHODS_ALLOWED',
+      'GET,HEAD,PUT,PATCH,POST,DELETE',
+    ), // Allow specific HTTP methods
     allowedHeaders: 'Content-Type, Accept, Authorization', // Allow specific headers
     credentials: true, // Allow credentials
   });
-  app.use(cookieParser()); // Use cookie parser middleware
+  const port = cfg.get<number>('PORT', 3000);
   await app.listen(port);
-  console.log('Listening on port:', port);
+  console.log(
+    `🚀 API Gateway listening on http://localhost:${port}/apigateway`,
+  );
 }
 main();
