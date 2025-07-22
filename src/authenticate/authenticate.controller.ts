@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Req, UsePipes, Session } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Req,
+  UsePipes,
+  Session,
+  Get,
+  Res,
+} from '@nestjs/common';
 import { AuthenticateService } from './authenticate.service';
 import { JoiValidationPipe } from 'src/pipes/password-grant/password-grant.pipe';
 import { UserPasswordSchema } from 'src/pipes/validation-schemas/userpassword';
@@ -31,8 +40,9 @@ export class AuthenticateController {
     const { user, password } = body;
 
     const result = await this.authenticateService.login(user, password);
+
     session.accessToken = result?.token;
-    console.log('Session id', session.id);
+    console.log('Session', session);
 
     return {
       success: true,
@@ -53,5 +63,16 @@ export class AuthenticateController {
       success: true,
       message: 'Logout successful',
     };
+  }
+  @Get('test')
+  test(
+    @Res() res: Record<string, any>,
+    @Session() session: Record<string, any>,
+  ): boolean {
+    session.accessToken = 'hola';
+    // This is just a test endpoint to check if the session and cookies are working
+    console.log('session.id', session.id);
+
+    return res.send('Session and cookies are working');
   }
 }
