@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { ProxyModule } from './proxy/proxy.module';
+import { CustomRedisModule } from './redis/redis.module';
+import { SessionModule } from './session/session.module';
 
 @Module({
   imports: [
@@ -14,11 +16,13 @@ import { ProxyModule } from './proxy/proxy.module';
       isGlobal: true,
       envFilePath: ['.env'],
     }),
+    CustomRedisModule,
     AuthenticateModule,
     EncryptionsModule,
     RolesModule,
     PermissionsModule,
     ProxyModule,
+    SessionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
