@@ -56,7 +56,6 @@ export class AuthenticateService {
       });
       const token = response.data.access_token;
       const decodedToken: DecodedToken = jwt.jwtDecode(token);
-      console.log('DecodedToken', decodedToken);
 
       if (!decodedToken.roles?.length) {
         throw new UnauthorizedException('El usuario no tiene roles asignados');

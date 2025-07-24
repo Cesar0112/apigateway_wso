@@ -12,6 +12,6 @@ export class SessionModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(SessionMiddleware) // se monta automáticamente
-      .forRoutes('*'); // sobre todas las rutas
+      .forRoutes('*path'); // sobre todas las rutas
   }
 }

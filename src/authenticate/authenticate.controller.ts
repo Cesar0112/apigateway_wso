@@ -12,7 +12,7 @@ import { AuthenticateService } from './authenticate.service';
 import { JoiValidationPipe } from 'src/pipes/password-grant/password-grant.pipe';
 import { UserPasswordSchema } from 'src/pipes/validation-schemas/userpassword';
 import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { Session as se } from 'express-session';
 
 interface CustomSession extends se {
@@ -36,19 +36,19 @@ export class AuthenticateController {
   async login(
     @Session() session: Record<string, any>,
     @Body() body: { user: string; password: string },
+    @Res() res: Response,
   ): Promise<any> {
     const { user, password } = body;
 
     const result = await this.authenticateService.login(user, password);
 
     session.accessToken = result?.token;
-    console.log('Session', session);
-
-    return {
+    //console.log('Session', session);
+    res.status(200).send({
       success: true,
       message: 'Authentication successful',
       permissions: result?.user?.permissions,
-    };
+    });
   }
   @ApiTags('Desautenticación')
   @ApiResponse({ status: 200, description: 'Logout exitoso' })
@@ -65,14 +65,11 @@ export class AuthenticateController {
     };
   }
   @Get('test')
-  test(
-    @Res() res: Record<string, any>,
-    @Session() session: Record<string, any>,
-  ): boolean {
+  test(@Session() session: Record<string, any>) {
     session.accessToken = 'hola';
     // This is just a test endpoint to check if the session and cookies are working
-    console.log('session.id', session.id);
+    //console.log('session.id', session.id);
 
-    return res.send('Session and cookies are working');
+    return 'Session and cookies are working';
   }
 }

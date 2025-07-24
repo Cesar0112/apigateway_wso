@@ -9,6 +9,8 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { ProxyModule } from './proxy/proxy.module';
 import { CustomRedisModule } from './redis/redis.module';
 import { SessionModule } from './session/session.module';
+import { UsersModule } from './users/users.module';
+import { StructuresModule } from './structures/structures.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { SessionModule } from './session/session.module';
     PermissionsModule,
     ProxyModule,
     SessionModule,
+    UsersModule,
+    StructuresModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -21,7 +21,7 @@ async function main() {
   }
   // 2. Middleware en orden logico
   //app.use(cookieParser()); // Use cookie parser middleware
-  console.log('NODE ENV', cfg.get<string>('NODE_ENV'));
+  //console.log('NODE ENV', cfg.get<string>('NODE_ENV'));
   // 3. Pipes & Filters globales
   //app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   //app.useGlobalFilters(new AllExceptionsFilter());
