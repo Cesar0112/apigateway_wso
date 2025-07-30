@@ -6,7 +6,8 @@ import {
   UsePipes,
   Session,
   Get,
-  Res,
+  UseInterceptors,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthenticateService } from './authenticate.service';
 import { JoiValidationPipe } from 'src/pipes/password-grant/password-grant.pipe';
@@ -14,6 +15,7 @@ import { UserPasswordSchema } from 'src/pipes/validation-schemas/userpassword';
 import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Session as se } from 'express-session';
+import { EncryptionResponseInterceptor } from 'src/encryption-response/encryption-response.interceptor';
 
 interface CustomSession extends se {
   accessToken?: string;
@@ -25,6 +27,7 @@ interface RequestWithSession extends Request {
   session: CustomSession;
 }
 
+@UseInterceptors(EncryptionResponseInterceptor)
 @Controller('authenticate')
 export class AuthenticateController {
   constructor(private readonly authenticateService: AuthenticateService) {}
@@ -33,22 +36,21 @@ export class AuthenticateController {
   @ApiBody({ schema: { example: { user: 'usuario', password: 'contraseña' } } })
   @ApiResponse({ status: 200, description: 'Login exitoso' })
   @Post()
+  @HttpCode(200)
   async login(
     @Session() session: Record<string, any>,
     @Body() body: { user: string; password: string },
-    @Res() res: Response,
   ): Promise<any> {
     const { user, password } = body;
 
     const result = await this.authenticateService.login(user, password);
 
     session.accessToken = result?.token;
-    //console.log('Session', session);
-    res.status(200).send({
+    return {
       success: true,
       message: 'Authentication successful',
       permissions: result?.user?.permissions,
-    });
+    };
   }
   @ApiTags('Desautenticación')
   @ApiResponse({ status: 200, description: 'Logout exitoso' })

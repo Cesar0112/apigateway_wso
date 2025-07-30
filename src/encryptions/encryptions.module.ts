@@ -4,6 +4,6 @@ import { EncryptionsController } from './encryptions.controller';
 
 @Module({
   providers: [EncryptionsService],
-  controllers: [EncryptionsController]
+  controllers: [EncryptionsController],
 })
 export class EncryptionsModule {}

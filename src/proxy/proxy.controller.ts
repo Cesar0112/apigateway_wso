@@ -11,6 +11,7 @@ import { ProxyService } from './proxy.service';
 import { Channel } from './proxy.interface';
 import { SessionTokenGuard } from '../guards/session-token.guard';
 import { ProxyGateway } from './proxy.gateway';
+import { AxiosResponse } from 'axios';
 
 @Controller('*path')
 @UseGuards(SessionTokenGuard)
@@ -28,17 +29,16 @@ export class ProxyController {
         (req.headers['x-channel'] as Channel) || Channel.HTTP;
       console.log('Petición');
 
-      const response = await this.proxyService.sendRequest(
+      const response: AxiosResponse = await this.proxyService.sendRequest(
         req.path,
         req.method,
         req.body,
         channel,
       );
 
-      res
-        .status(response?.status || HttpStatus.OK)
-        .set(response?.headers || {})
-        .send(response?.body || '');
+      res.status(200);
+
+      return response.data;
     } catch (error) {
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)

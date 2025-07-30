@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as strategies from '../strategies';
 import { Channel } from './proxy.interface';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class ProxyService {
@@ -9,7 +10,7 @@ export class ProxyService {
     method: string,
     body: any,
     channel: Channel,
-  ): Promise<any> {
+  ): Promise<AxiosResponse> {
     let strategy: strategies.ClientStrategy;
 
     switch (channel) {

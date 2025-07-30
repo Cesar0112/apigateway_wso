@@ -23,7 +23,7 @@ export class HttpClientStrategy implements ClientStrategy {
     method: string,
     body?: Record<string, any>,
     withToken: boolean = true,
-  ): Promise<unknown> {
+  ): Promise<AxiosResponse> {
     // 1. Normalizar entrada
     const safePath = String(path ?? '').trim();
     const safeBody = body ?? {};

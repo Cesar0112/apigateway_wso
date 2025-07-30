@@ -1,4 +1,4 @@
-import { ProxyResponse } from 'src/proxy/proxy.interface';
+import { AxiosResponse } from 'axios';
 
 export interface ClientStrategy {
   sendRequest(
@@ -6,5 +6,5 @@ export interface ClientStrategy {
     method: string,
     body: any,
     withToken?: boolean,
-  ): Promise<unknown>;
+  ): Promise<AxiosResponse>;
 }
