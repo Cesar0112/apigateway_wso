@@ -29,12 +29,9 @@ export class AuthenticateService {
         client_id: this.configService.get<string>('WSO2_CLIENT_ID'),
         client_secret: this.configService.get<string>('CLIENT_SECRET'),
         username: user,
-        password: this.encryptionsService.decryptPassword(
-          password,
-          this.configService.get<string>('ENCRYPTION_PASSWORD') ??
-            'IkIopwlWorpqUj',
-        ),
-        scope: 'openid groups profile roles internal_role_mgt_view',
+        password: this.encryptionsService.decrypt(password),
+        scope:
+          'openid groups id_structure profile roles internal_role_mgt_view',
       });
       const headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -72,6 +69,7 @@ export class AuthenticateService {
           decodedToken.roles,
           response.data.access_token,
         );
+        console.log(decodedToken);
 
         if (!scopes.length) {
           throw new UnauthorizedException(
@@ -91,7 +89,7 @@ export class AuthenticateService {
 
         return {
           success: true,
-          token: token,
+          token: decodedToken,
           source: 'wso2',
           user: {
             username: user,
