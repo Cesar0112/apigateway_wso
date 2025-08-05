@@ -2,6 +2,7 @@
 import { Module } from '@nestjs/common';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisService } from './redis.service';
 @Module({
   imports: [
     RedisModule.forRootAsync({
@@ -18,6 +19,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
     }),
   ],
-  exports: [RedisModule],
+  exports: [RedisModule, RedisService],
+  providers: [RedisService],
 })
 export class CustomRedisModule {}

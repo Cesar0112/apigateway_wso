@@ -15,6 +15,7 @@ export class SessionMiddleware implements NestMiddleware {
         const redisStore: session.Store = new RedisStore({
           client: redisClient,
         });
+
         this.middleware = session({
           store: redisStore,
           name: cfg.cookieName,
@@ -24,7 +25,7 @@ export class SessionMiddleware implements NestMiddleware {
           cookie: {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: cfg.ttlSeconds * 1000, //ms
+            maxAge: cfg.ttlSeconds * 1000,
             sameSite: 'lax',
           },
         });

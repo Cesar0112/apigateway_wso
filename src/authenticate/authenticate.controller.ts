@@ -45,7 +45,7 @@ export class AuthenticateController {
 
     const result = await this.authenticateService.login(user, password);
 
-    session.accessToken = result?.token;
+    session.permissions = result?.user?.permissions;
     return {
       success: true,
       message: 'Authentication successful',

@@ -12,9 +12,10 @@ import { Channel } from './proxy.interface';
 import { SessionTokenGuard } from '../guards/session-token.guard';
 import { ProxyGateway } from './proxy.gateway';
 import { AxiosResponse } from 'axios';
+import { ProxyScopeGuard } from './proxy-scope.guard';
 
 @Controller('*path')
-@UseGuards(SessionTokenGuard)
+@UseGuards(SessionTokenGuard, ProxyScopeGuard)
 export class ProxyController {
   constructor(
     private readonly proxyService: ProxyService,
@@ -36,13 +37,16 @@ export class ProxyController {
         channel,
       );
 
-      res.status(200);
-
-      return response.data;
+      res.status(200).json(response.data);
+      return;
     } catch (error) {
+      const errorMessage =
+        error && typeof error === 'object' && 'message' in error
+          ? (error as { message: string }).message
+          : 'Internal server error';
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ error: error.message });
+        .json({ error: errorMessage });
     }
   }
 }

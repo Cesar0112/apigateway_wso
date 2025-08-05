@@ -4,33 +4,41 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import * as jwt from 'jsonwebtoken';
+
+import { Request } from 'express';
+import { RedisService } from 'src/redis/redis.service';
+import { SessionRedis } from 'src/session/session.interface';
 
 @Injectable()
 export class SessionTokenGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const req = context.switchToHttp().getRequest();
-    const token = req.session?.accessToken;
-    if (!token) {
+  constructor(private redisService: RedisService) {}
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const req: Request = context.switchToHttp().getRequest();
+
+    const sessionID = req.sessionID;
+    if (!sessionID) {
       throw new UnauthorizedException('No session token found');
     }
+
     try {
-      // Decodifica el token sin verificar la firma (solo para leer el payload)
-      const decoded: any = jwt.decode(token);
-      if (!decoded || !decoded.exp) {
-        throw new UnauthorizedException('Invalid token');
+      // Verificar si el sessionID existe en Redis
+      const sessionData = await this.redisService.get('sess:' + sessionID);
+      if (!sessionData) {
+        throw new UnauthorizedException('Invalid or expired session');
       }
-      // Verifica expiración (exp está en segundos desde epoch)
-      const now = Math.floor(Date.now() / 1000);
-      if (decoded.exp < now) {
-        req.session.destroy?.(() => {}); // Destruye la sesión si el token expiró
-        throw new UnauthorizedException('Session expired');
+
+      // Opcional: Verificar si la sesión ha expirado (si Redis almacena una fecha de expiración)
+      const session: SessionRedis = JSON.parse(sessionData) as SessionRedis;
+
+      if (
+        session.cookie.expires &&
+        Date.now() > new Date(session.cookie.expires).getTime()
+      ) {
+        throw new UnauthorizedException('Session has expired');
       }
+
       return true;
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired session');
     }
   }

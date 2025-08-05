@@ -2,10 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-//import { ValidationPipe } from '@nestjs/common';
-//import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'; // créalo si no existe
-import * as session from 'express-session';
-import IORedis from 'ioredis';
 
 import * as morgan from 'morgan';
 import * as dotenv from 'dotenv';
@@ -19,12 +15,6 @@ async function main() {
   if (process.env.NODE_ENV !== 'test') {
     app.use(morgan('combined')); // Use morgan for logging HTTP requests
   }
-  // 2. Middleware en orden logico
-  //app.use(cookieParser()); // Use cookie parser middleware
-  //console.log('NODE ENV', cfg.get<string>('NODE_ENV'));
-  // 3. Pipes & Filters globales
-  //app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  //app.useGlobalFilters(new AllExceptionsFilter());
 
   //4 .Prefijo golbal
   app.setGlobalPrefix('apigateway'); // Set global prefix for all routes

@@ -11,6 +11,7 @@ import { CustomRedisModule } from './redis/redis.module';
 import { SessionModule } from './session/session.module';
 import { UsersModule } from './users/users.module';
 import { StructuresModule } from './structures/structures.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { StructuresModule } from './structures/structures.module';
     SessionModule,
     UsersModule,
     StructuresModule,
+    WebhooksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

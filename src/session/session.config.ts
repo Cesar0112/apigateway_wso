@@ -14,7 +14,10 @@ export class SessionConfig {
   };
   constructor(private readonly cfg: ConfigService) {
     this.secret = this.cfg.getOrThrow<string>('SESSION_SECRET');
-    this.ttlSeconds = +this.cfg.getOrThrow<number>('SESSION_TTL', 86400); //Está en segundos
+    this.ttlSeconds = +this.cfg.getOrThrow<number>(
+      'SESSION_TTL_SECONDS',
+      86400,
+    ); //Está en segundos
     this.cookieName = this.cfg.get<string>('SESSION_COOKIE_NAME', 'sid');
     this.redis = {
       host: this.cfg.get<string>('REDIS_HOST', 'localhost'),

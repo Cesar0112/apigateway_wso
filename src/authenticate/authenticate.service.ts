@@ -51,6 +51,7 @@ export class AuthenticateService {
         headers,
         httpsAgent: new https.Agent({ rejectUnauthorized: false }), //TODO remove this in production
       });
+      console.log('DecodedToken', response.data);
       const token = response.data.access_token;
       const decodedToken: DecodedToken = jwt.jwtDecode(token);
 
@@ -69,7 +70,6 @@ export class AuthenticateService {
           decodedToken.roles,
           response.data.access_token,
         );
-        console.log(decodedToken);
 
         if (!scopes.length) {
           throw new UnauthorizedException(
