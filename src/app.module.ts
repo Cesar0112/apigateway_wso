@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthenticateModule } from './authenticate/authenticate.module';
 import { EncryptionsModule } from './encryptions/encryptions.module';
-import { ConfigModule } from '@nestjs/config';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { ProxyModule } from './proxy/proxy.module';
@@ -12,12 +12,14 @@ import { SessionModule } from './session/session.module';
 import { UsersModule } from './users/users.module';
 import { StructuresModule } from './structures/structures.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { ConfigService } from './config/config.service';
+import { ConfigController } from './config/config.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env'],
+      envFilePath: '.env',
     }),
     CustomRedisModule,
     AuthenticateModule,
@@ -30,7 +32,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     StructuresModule,
     WebhooksModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, ConfigController],
+  providers: [AppService, ConfigService],
 })
 export class AppModule {}

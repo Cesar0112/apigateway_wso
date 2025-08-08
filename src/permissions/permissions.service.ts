@@ -6,11 +6,12 @@ import axios, { AxiosResponse } from 'axios';
 import * as https from 'https';
 import { jwtDecode } from 'jwt-decode';
 import { DecodedToken } from 'src/authenticate/authenticate.interface';
-import { ConfigService } from '@nestjs/config';
+
 import {
   Permission,
   RoleSearchResponse,
 } from 'src/roles/interfaces/role_search_response.interface';
+import { ConfigService } from 'src/config/config.service';
 
 @Injectable()
 export class PermissionsService {
@@ -65,7 +66,7 @@ export class PermissionsService {
     }
     for (const role of rolesArray) {
       try {
-        const url: string = `${this.configService.get<string>('WSO2_URL')}/scim2/${this.configService.get<string>('WSO2_API_VERSION')}/Roles/.search`;
+        const url: string = `${this.configService.get('WSO2')?.URL}/scim2/${this.configService.get('WSO2')?.API_VERSION}/Roles/.search`;
         const { data }: AxiosResponse<RoleSearchResponse> =
           await axios.post<RoleSearchResponse>(
             url,

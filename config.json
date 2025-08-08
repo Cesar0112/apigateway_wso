@@ -1,0 +1,31 @@
+{
+  "NODE_ENV": "dev",
+  "WSO2": {
+    "HOST": "https://10.12.24.205",
+    "PORT": 9443,
+    "API_VERSION": "v2",
+    "CLIENT_ID": "cIGhYzy75LwxzSVFb9k4BsSavT0a",
+    "CLIENT_SECRET": "T9PjTVNCvvONGAof4Rec_70BZVvuYAts8PmDt5aikPga"
+  },
+  "API_GATEWAY": {
+    "HOST": "localhost",
+    "PORT": 10411,
+    "SESSION_SECRET": "s3cr3t",
+    "PROXY": false,
+    "API_URL": "http://10.12.24.205:10410",
+    "ENCRYPTION_PASSWORD": "IkIopwlWorpqUj",
+    "REDIS_URL": "redis://localhost:6379",
+    "PROXY_STATIC_MAP_PATH": "./routes.json",
+    "CORS_ORIGIN": "http://localhost:8080",
+    "HTTP_METHODS_ALLOWED": "GET,PUT,POST,HEADER,DELETE"
+  },
+  "SESSION": {
+    "FOLDER": "sessions_dev",
+    "SECRET": "T9PjTVNCvvONGAof4RecIkIopwlWorpqUj",
+    "TTL_SECONDS": 86400,
+    "COOKIE_NAME": "apigateway_sid",
+    "REDIS_HOST": "localhost",
+    "REDIS_PORT": 6379,
+    "REDIS_TLS": false
+  }
+}

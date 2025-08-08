@@ -15,7 +15,8 @@ import { AxiosResponse } from 'axios';
 import { ProxyScopeGuard } from './proxy-scope.guard';
 
 @Controller('*path')
-@UseGuards(SessionTokenGuard, ProxyScopeGuard)
+@UseGuards(SessionTokenGuard)
+@UseGuards(ProxyScopeGuard)
 export class ProxyController {
   constructor(
     private readonly proxyService: ProxyService,

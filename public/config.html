@@ -1,0 +1,214 @@
+<!-- public/config.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración General</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Editar Configuración General</h1>
+    <form id="configForm">
+        <!-- Campos para la configuración general -->
+        <label for="nodeEnv">Entorno (NODE_ENV):</label>
+        <input type="text" id="nodeEnv" name="nodeEnv" required readonly>
+
+        <label for="ws2Host">WSO2 HOST:</label>
+        <input type="text" id="ws2Host" name="ws2Host">
+
+        <label for="ws2Port">WSO2 PORT:</label>
+        <input type="number" id="ws2Port" name="ws2Port">
+
+        <label for="ws2ApiVersion">WSO2 API_VERSION:</label>
+        <input type="text" id="ws2ApiVersion" name="ws2ApiVersion">
+
+        <label for="ws2ClientId">WSO2 CLIENT_ID:</label>
+        <input type="text" id="ws2ClientId" name="ws2ClientId">
+
+        <label for="ws2ClientSecret">WSO2 CLIENT_SECRET:</label>
+        <input type="text" id="ws2ClientSecret" name="ws2ClientSecret">
+
+        <label for="apiGatewayHost">API_GATEWAY HOST:</label>
+        <input type="text" id="apiGatewayHost" name="apiGatewayHost">
+
+        <label for="apiGatewayPort">API_GATEWAY PORT:</label>
+        <input type="number" id="apiGatewayPort" name="apiGatewayPort">
+
+        <label for="apiGatewaySessionSecret">API_GATEWAY SESSION_SECRET:</label>
+        <input type="text" id="apiGatewaySessionSecret" name="apiGatewaySessionSecret">
+
+        <label for="apiGatewayProxy">API_GATEWAY PROXY:</label>
+        <input type="checkbox" id="apiGatewayProxy" name="apiGatewayProxy">
+
+        <label for="apiGatewayApiUrl">API_GATEWAY API_URL:</label>
+        <input type="text" id="apiGatewayApiUrl" name="apiGatewayApiUrl">
+
+        <label for="apiGatewayEncryptionPassword">API_GATEWAY ENCRYPTION_PASSWORD:</label>
+        <input type="text" id="apiGatewayEncryptionPassword" name="apiGatewayEncryptionPassword">
+
+        <label for="apiGatewayRedisUrl">API_GATEWAY REDIS_URL:</label>
+        <input type="text" id="apiGatewayRedisUrl" name="apiGatewayRedisUrl">
+
+        <label for="apiGatewayProxyStaticMapPath">API_GATEWAY PROXY_STATIC_MAP_PATH:</label>
+        <input type="text" id="apiGatewayProxyStaticMapPath" name="apiGatewayProxyStaticMapPath" readonly>
+
+        <label for="apiGatewayCorsOrigin">API_GATEWAY CORS_ORIGIN:</label>
+        <input type="text" id="apiGatewayCorsOrigin" name="apiGatewayCorsOrigin">
+
+        <label for="apiGatewayHttpMethodsAllowed">API_GATEWAY HTTP_METHODS_ALLOWED:</label>
+        <input type="text" id="apiGatewayHttpMethodsAllowed" name="apiGatewayHttpMethodsAllowed">
+
+        <label for="sessionFolder">SESSION FOLDER:</label>
+        <input type="text" id="sessionFolder" name="sessionFolder">
+
+        <label for="sessionSecret">SESSION SECRET:</label>
+        <input type="text" id="sessionSecret" name="sessionSecret">
+
+        <label for="sessionTtlSeconds">SESSION TTL_SECONDS:</label>
+        <input type="number" id="sessionTtlSeconds" name="sessionTtlSeconds">
+
+        <label for="sessionCookieName">SESSION COOKIE_NAME:</label>
+        <input type="text" id="sessionCookieName" name="sessionCookieName">
+
+        <label for="sessionRedisHost">SESSION REDIS_HOST:</label>
+        <input type="text" id="sessionRedisHost" name="sessionRedisHost">
+
+        <label for="sessionRedisPort">SESSION REDIS_PORT:</label>
+        <input type="number" id="sessionRedisPort" name="sessionRedisPort">
+
+        <label for="sessionRedisTls">SESSION REDIS_TLS:</label>
+        <input type="checkbox" id="sessionRedisTls" name="sessionRedisTls">
+
+        <button type="submit">Guardar Configuración</button>
+    </form>
+
+    <script>
+        document.getElementById('configForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const config = {
+                NODE_ENV: document.getElementById('nodeEnv').value,
+                WSO2: {
+                    HOST: document.getElementById('ws2Host').value,
+                    PORT: parseInt(document.getElementById('ws2Port').value, 10),
+                    API_VERSION: document.getElementById('ws2ApiVersion').value,
+                    CLIENT_ID: document.getElementById('ws2ClientId').value,
+                    CLIENT_SECRET: document.getElementById('ws2ClientSecret').value,
+                },
+                API_GATEWAY: {
+                    HOST: document.getElementById('apiGatewayHost').value,
+                    PORT: parseInt(document.getElementById('apiGatewayPort').value, 10),
+                    SESSION_SECRET: document.getElementById('apiGatewaySessionSecret').value,
+                    PROXY: document.getElementById('apiGatewayProxy').checked,
+                    API_URL: document.getElementById('apiGatewayApiUrl').value,
+                    ENCRYPTION_PASSWORD: document.getElementById('apiGatewayEncryptionPassword').value,
+                    REDIS_URL: document.getElementById('apiGatewayRedisUrl').value,
+                    PROXY_STATIC_MAP_PATH: document.getElementById('apiGatewayProxyStaticMapPath').value,
+                    CORS_ORIGIN: document.getElementById('apiGatewayCorsOrigin').value,
+                    HTTP_METHODS_ALLOWED: document.getElementById('apiGatewayHttpMethodsAllowed').value,
+                },
+                SESSION: {
+                    FOLDER: document.getElementById('sessionFolder').value,
+                    SECRET: document.getElementById('sessionSecret').value,
+                    TTL_SECONDS: parseInt(document.getElementById('sessionTtlSeconds').value, 10),
+                    COOKIE_NAME: document.getElementById('sessionCookieName').value,
+                    REDIS_HOST: document.getElementById('sessionRedisHost').value,
+                    REDIS_PORT: parseInt(document.getElementById('sessionRedisPort').value, 10),
+                    REDIS_TLS: document.getElementById('sessionRedisTls').checked,
+                },
+            };
+
+            try {
+                const response = await fetch('/apigateway/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(config),
+                });
+
+                if (response.ok) {
+                    alert('Configuración actualizada correctamente');
+                } else {
+                    alert('Error al actualizar la configuración');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar la configuración');
+            }
+        });
+
+        // Cargar la configuración actual al cargar la página
+        window.onload = async () => {
+            try {
+                const response = await fetch('/apigateway/config');
+                const config = await response.json();
+                console.log(config);
+
+                document.getElementById('nodeEnv').value = config.NODE_ENV;
+                document.getElementById('ws2Host').value = config.WSO2?.HOST;
+                document.getElementById('ws2Port').value = config.WSO2?.PORT;
+                document.getElementById('ws2ApiVersion').value = config.WSO2?.API_VERSION;
+                document.getElementById('ws2ClientId').value = config.WSO2?.CLIENT_ID;
+                document.getElementById('ws2ClientSecret').value = config.WSO2?.CLIENT_SECRET;
+                document.getElementById('apiGatewayHost').value = config.API_GATEWAY?.HOST;
+                document.getElementById('apiGatewayPort').value = config.API_GATEWAY?.PORT;
+                document.getElementById('apiGatewaySessionSecret').value = config.API_GATEWAY?.SESSION_SECRET;
+                document.getElementById('apiGatewayProxy').checked = config.API_GATEWAY?.PROXY;
+                document.getElementById('apiGatewayApiUrl').value = config.API_GATEWAY?.API_URL;
+                document.getElementById('apiGatewayEncryptionPassword').value = config.API_GATEWAY?.ENCRYPTION_PASSWORD;
+                document.getElementById('apiGatewayRedisUrl').value = config.API_GATEWAY?.REDIS_URL;
+                document.getElementById('apiGatewayProxyStaticMapPath').value = config.API_GATEWAY?.PROXY_STATIC_MAP_PATH;
+                document.getElementById('apiGatewayCorsOrigin').value = config.API_GATEWAY?.CORS_ORIGIN;
+                document.getElementById('apiGatewayHttpMethodsAllowed').value = config.API_GATEWAY?.HTTP_METHODS_ALLOWED;
+                document.getElementById('sessionFolder').value = config.SESSION?.FOLDER;
+                document.getElementById('sessionSecret').value = config.SESSION?.SECRET;
+                document.getElementById('sessionTtlSeconds').value = config.SESSION?.TTL_SECONDS;
+                document.getElementById('sessionCookieName').value = config.SESSION?.COOKIE_NAME;
+                document.getElementById('sessionRedisHost').value = config.SESSION?.REDIS_HOST;
+                document.getElementById('sessionRedisPort').value = config.SESSION?.REDIS_PORT;
+                document.getElementById('sessionRedisTls').checked = config.SESSION?.REDIS_TLS;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar la configuración');
+            }
+        };
+    </script>
+</body>
+
+</html>

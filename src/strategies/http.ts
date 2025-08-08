@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import * as https from 'https';
 import { ClientStrategy } from './client-strategy';
-import * as env from '../config';
+import { ConfigService } from 'src/config/config.service';
 
 interface RequestOptions {
   path: string;
@@ -12,7 +12,8 @@ interface RequestOptions {
 
 export class HttpClientStrategy implements ClientStrategy {
   private http: AxiosInstance;
-  constructor() {
+  constructor(private readonly cfg: ConfigService) {
+    this.cfg = cfg;
     this.http = axios.create({
       proxy: false,
       httpsAgent: new https.Agent({ rejectUnauthorized: false }), // TODO remove in production
@@ -29,7 +30,8 @@ export class HttpClientStrategy implements ClientStrategy {
     const safeBody = body ?? {};
 
     // 3. Ensamblar URL
-    const url = `${env.API_URL}${safePath}`.trim();
+    const apiUrl = this.cfg.get('API_GATEWAY')?.API_URL;
+    const url = `${apiUrl}${safePath}`.trim();
     // 4. Validar URL
     try {
       new URL(url);

@@ -3,7 +3,17 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "assets": [
+      {
+        "include": "./config.json",
+        "outDir": "./dist"
+      },
+      {
+        "include": "./routes.json",
+        "outDir": "./dist"
+      }
+    ]
   },
   "generateOptions": {
     "spec": false

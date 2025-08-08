@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import * as strategies from '../strategies';
 import { Channel } from './proxy.interface';
 import { AxiosResponse } from 'axios';
+import { ConfigService } from 'src/config/config.service';
 
 @Injectable()
 export class ProxyService {
+  constructor(private readonly cfg: ConfigService) {}
   async sendRequest(
     path: string,
     method: string,
@@ -15,7 +17,7 @@ export class ProxyService {
 
     switch (channel) {
       case Channel.HTTP:
-        strategy = new strategies.HttpClientStrategy();
+        strategy = new strategies.HttpClientStrategy(this.cfg);
         break;
       case Channel.NATS:
         strategy = new strategies.NatsClientStrategy();

@@ -6,11 +6,11 @@ import * as https from 'https';
 import * as jwt from 'jwt-decode';
 import { WSO2TokenResponse, DecodedToken } from './authenticate.interface';
 
-import { ConfigService } from '@nestjs/config';
 import { EncryptionsService } from '../encryptions/encryptions.service';
 import { PermissionsService } from 'src/permissions/permissions.service';
 import { Agent as HttpsAgent } from 'https';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { ConfigService } from 'src/config/config.service';
 @Injectable()
 export class AuthenticateService {
   constructor(
@@ -22,12 +22,12 @@ export class AuthenticateService {
   async login(user: string, password: string) {
     try {
       const url: string =
-        this.configService.get<string>('WSO2_URL_TOKEN') ??
+        this.configService.get('WSO2')?.URL_TOKEN ??
         'https://localhost:9443/oauth2/token';
       const data = qs.stringify({
         grant_type: 'password',
-        client_id: this.configService.get<string>('WSO2_CLIENT_ID'),
-        client_secret: this.configService.get<string>('CLIENT_SECRET'),
+        client_id: this.configService.get('WSO2')?.CLIENT_ID,
+        client_secret: this.configService.get('WSO2')?.CLIENT_SECRET,
         username: user,
         password: this.encryptionsService.decrypt(password),
         scope:
@@ -105,15 +105,15 @@ export class AuthenticateService {
   }
   async logout(accessToken: string): Promise<void> {
     const revokeUrl =
-      this.configService.get<string>('WSO2_REVOKE_URL') ||
+      this.configService.get('WSO2')?.REVOKE_URL ||
       'https://localhost:9443/oauth2/revoke';
     try {
       await axios.post(
         revokeUrl,
         qs.stringify({
           token: accessToken,
-          client_id: this.configService.get<string>('WSO2_CLIENT_ID'),
-          client_secret: this.configService.get<string>('CLIENT_SECRET'),
+          client_id: this.configService.get('WSO2')?.CLIENT_ID,
+          client_secret: this.configService.get('WSO2')?.CLIENT_SECRET,
         }),
         {
           headers: {

@@ -1,0 +1,94 @@
+<!-- public/routes.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Rutas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Editar Configuración de Rutas</h1>
+    <form id="routesForm">
+        <label for="routes">Rutas (JSON):</label>
+        <textarea id="routes" name="routes" rows="10" required></textarea>
+
+        <button type="submit">Guardar Rutas</button>
+    </form>
+
+    <script>
+        document.getElementById('routesForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const routes = document.getElementById('routes').value;
+
+            try {
+                const response = await fetch('/apigateway/config/routes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ROUTE: JSON.parse(routes) }),
+                });
+
+                if (response.ok) {
+                    alert('Rutas actualizadas correctamente');
+                } else {
+                    alert('Error al actualizar las rutas');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar las rutas');
+            }
+        });
+
+        // Cargar las rutas actuales al cargar la página
+        window.onload = async () => {
+            try {
+                const response = await fetch('/apigateway/config/routes');
+                const routes = await response.json();
+
+                document.getElementById('routes').value = JSON.stringify(routes, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar las rutas');
+            }
+        };
+    </script>
+</body>
+
+</html>
