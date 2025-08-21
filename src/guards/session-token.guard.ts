@@ -1,8 +1,6 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   CanActivate,
   ExecutionContext,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,10 +8,14 @@ import { Cache } from 'cache-manager';
 
 import { Request } from 'express';
 import { SessionData } from '../session/interfaces/session.interface';
+import { SessionService } from 'src/session/session.service';
 
+/**
+ * WARNING para acceder a los datos de session que almacena express-session no usar CACHE_MANAGER
+ */
 @Injectable()
 export class SessionTokenGuard implements CanActivate {
-  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
+  constructor(private readonly sessionService: SessionService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: Request = context.switchToHttp().getRequest();
 
@@ -22,26 +24,32 @@ export class SessionTokenGuard implements CanActivate {
       throw new UnauthorizedException('No session token found');
     }
 
-    try {
-      // Verificar si el sessionID existe en SessionStore
-      const sessionData = await this.cacheManager.get<string>(sessionID);
-      if (!sessionData) {
-        throw new UnauthorizedException('Invalid or expired session');
-      }
+    // Leemos la sesión desde el mismo store que usa express-session
+    const session = await this.getSession(sessionID);
 
-      // Opcional: Verificar si la sesión ha expirado
-      const session: SessionData = JSON.parse(sessionData) as SessionData;
-
-      if (
-        session.cookie.expires &&
-        Date.now() > new Date(session.cookie.expires).getTime()
-      ) {
-        throw new UnauthorizedException('Session has expired');
-      }
-
-      return true;
-    } catch {
+    if (!session) {
       throw new UnauthorizedException('Invalid or expired session');
     }
+
+    // Validación opcional: ¿la cookie ya expiró?
+    if (this.isExpired(session)) {
+      throw new UnauthorizedException('Session has expired');
+    }
+
+    return true;
+  }
+  private getSession(sessionID: string): Promise<Record<string, any> | null> {
+    const store = this.sessionService.getExpressSessionStore();
+
+    return new Promise((resolve, reject) =>
+      store.get(sessionID, (err, data) =>
+        err ? reject(err) : resolve(data as Record<string, any> | null),
+      ),
+    );
+  }
+
+  private isExpired(session: Record<string, any>): boolean {
+    const expires = session.cookie?.expires;
+    return expires && Date.now() > new Date(expires).getTime();
   }
 }

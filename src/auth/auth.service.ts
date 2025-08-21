@@ -1,5 +1,10 @@
 // src/auth/auth.service.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import axios from 'axios';
 import * as qs from 'querystring';
 import * as https from 'https';
@@ -8,15 +13,17 @@ import { WSO2TokenResponse, DecodedToken } from './auth.interface';
 
 import { EncryptionsService } from '../encryptions/encryptions.service';
 import { PermissionsService } from '../permissions/permissions.service';
-import { Agent as HttpsAgent } from 'https';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+
 import { ConfigService } from '../config/config.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly encryptionsService: EncryptionsService,
     private readonly permissionsService: PermissionsService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   async login(user: string, password: string) {
@@ -88,7 +95,8 @@ export class AuthService {
 
         return {
           success: true,
-          token: decodedToken,
+          decodedToken,
+          token,
           source: 'wso2',
           user: {
             username: user,
@@ -102,19 +110,25 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
   }
-  async logout(accessToken: string): Promise<void> {
+  async logout(sessionId: string): Promise<void> {
     const revokeUrl =
       this.configService.get('WSO2')?.REVOKE_URL ||
       'https://localhost:9443/oauth2/revoke';
     try {
+      let sessionData: string = (await this.cacheManager.get(sessionId)) ?? '';
+      const token = JSON.parse(sessionData);
+      if (!token) {
+        throw new InternalServerErrorException();
+      }
       await axios.post(
         revokeUrl,
         qs.stringify({
-          token: accessToken,
+          token,
           client_id: this.configService.get('WSO2')?.CLIENT_ID,
           client_secret: this.configService.get('WSO2')?.CLIENT_SECRET,
         }),
         {
+          proxy: false,
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },

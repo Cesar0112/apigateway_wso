@@ -25,10 +25,9 @@ export class ProxyScopeGuard implements CanActivate {
     const required = map[key] ?? [];
 
     if (!required.length) return true; // Público
-
-    const sessionData = await this.cacheManager.get<string>(
-      'sess:' + req.sessionID,
-    );
+    let thiskey: string = `sess:uz3LRVNd4Eta2nPV2RpsqRVnmcozzIGx`;
+    const sessionData = await this.cacheManager.get<string>(thiskey);
+    console.log(thiskey === `sess:${req.sessionID}`);
     const userSession: { permissions: string[] } = sessionData
       ? (JSON.parse(sessionData) as { permissions: string[] })
       : { permissions: [] };
