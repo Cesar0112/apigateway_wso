@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import * as CryptoJS from 'crypto-js';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../config/config.service';
 @Injectable()
 export class EncryptionsService {
   private readonly parsedKey: CryptoJS.lib.WordArray;
@@ -9,7 +9,7 @@ export class EncryptionsService {
 
   constructor(private readonly cfg: ConfigService) {
     const password: string =
-      this.cfg.get('API_GATEWAY')?.ENCRYPTION_PASSWORD.trim() ??
+      this.cfg.getConfig().API_GATEWAY?.ENCRYPTION_PASSWORD.trim() ??
       'IkIopwlWorpqUj';
     this.parsedKey = CryptoJS.SHA256(password);
     this.parsedIV = CryptoJS.MD5(password);

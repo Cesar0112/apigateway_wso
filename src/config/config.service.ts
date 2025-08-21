@@ -1,14 +1,15 @@
 // config.service.ts
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Config, RoutesConfig } from './config';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ConfigService {
-  public config: Config;
-  public routes: RoutesConfig;
-  constructor() {
+  private config: Config;
+  private routes: RoutesConfig;
+  constructor(/*@Inject(CACHE_MANAGER) private cacheManager: Cache*/) {
     this.loadConfig();
     this.loadRoutes();
     fs.watchFile(path.resolve('config.json'), () => {
@@ -17,10 +18,12 @@ export class ConfigService {
     });
     fs.watchFile(path.resolve('routes.json'), () => {
       this.loadRoutes();
-      console.log('⚙️ Configuración recargada');
+      console.log('⚙️ Configuración de rutas recargada');
     });
   }
-
+  public getConfig(): Config {
+    return this.config;
+  }
   public loadConfig() {
     const raw = fs.readFileSync('config.json', 'utf8');
     this.config = JSON.parse(raw) as Config;
@@ -28,11 +31,14 @@ export class ConfigService {
   public loadRoutes() {
     const raw = fs.readFileSync('routes.json', 'utf8');
     this.routes = JSON.parse(raw) as RoutesConfig;
+    /*this.cacheManager.set('proxy:routes', raw).catch((err) => {
+      console.error('Error al guardar rutas en caché:', err);
+    });*/
   }
-  get(key: string): any {
+  get<K extends keyof Config>(key: K): Config[K] {
     return this.config[key];
   }
-  getRoutes() {
+  getRoutes(): RoutesConfig {
     return this.routes || {};
   }
   getRoute(

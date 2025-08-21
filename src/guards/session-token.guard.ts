@@ -1,17 +1,19 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 
 import { Request } from 'express';
-import { RedisService } from 'src/redis/redis.service';
-import { SessionRedis } from 'src/session/session.interface';
+import { SessionData } from '../session/interfaces/session.interface';
 
 @Injectable()
 export class SessionTokenGuard implements CanActivate {
-  constructor(private redisService: RedisService) {}
+  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: Request = context.switchToHttp().getRequest();
 
@@ -21,14 +23,14 @@ export class SessionTokenGuard implements CanActivate {
     }
 
     try {
-      // Verificar si el sessionID existe en Redis
-      const sessionData = await this.redisService.get('sess:' + sessionID);
+      // Verificar si el sessionID existe en SessionStore
+      const sessionData = await this.cacheManager.get<string>(sessionID);
       if (!sessionData) {
         throw new UnauthorizedException('Invalid or expired session');
       }
 
-      // Opcional: Verificar si la sesión ha expirado (si Redis almacena una fecha de expiración)
-      const session: SessionRedis = JSON.parse(sessionData) as SessionRedis;
+      // Opcional: Verificar si la sesión ha expirado
+      const session: SessionData = JSON.parse(sessionData) as SessionData;
 
       if (
         session.cookie.expires &&

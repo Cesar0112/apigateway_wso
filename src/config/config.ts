@@ -6,6 +6,7 @@ import {
   ValidateNested,
   IsBoolean,
   IsArray,
+  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -70,10 +71,6 @@ export class ApiGatewayConfig {
 
   @IsString()
   @IsOptional()
-  REDIS_URL: string = 'redis://localhost:6379';
-
-  @IsString()
-  @IsOptional()
   PROXY_STATIC_MAP_PATH: string = './routes.json';
 
   @IsString()
@@ -100,19 +97,31 @@ export class SessionConfig {
 
   @IsString()
   @IsOptional()
-  COOKIE_NAME: string = 'apigateway_sid';
+  URL: string = 'redis://localhost:6379';
 
   @IsString()
   @IsOptional()
-  REDIS_HOST: string = 'localhost';
-
-  @IsNumber()
-  @IsOptional()
-  REDIS_PORT: number = 6379;
+  COOKIE_NAME: string = 'apigateway_sid';
 
   @IsBoolean()
   @IsOptional()
-  REDIS_TLS: boolean = false;
+  SECURE: boolean = false;
+
+  @IsString()
+  @IsOptional()
+  HOST: string = 'localhost';
+
+  @IsNumber()
+  @IsOptional()
+  PORT: number = 6379;
+
+  @IsBoolean()
+  @IsOptional()
+  TLS: boolean = false;
+
+  @IsIn(['redis', 'sqlite'])
+  @IsOptional()
+  STRATEGY: 'redis' | 'sqlite' = 'redis';
 }
 
 export class Config {

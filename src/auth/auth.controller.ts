@@ -9,13 +9,13 @@ import {
   UseInterceptors,
   HttpCode,
 } from '@nestjs/common';
-import { AuthenticateService } from './authenticate.service';
-import { JoiValidationPipe } from 'src/pipes/password-grant/password-grant.pipe';
-import { UserPasswordSchema } from 'src/pipes/validation-schemas/userpassword';
+import { AuthService } from './auth.service';
+import { JoiValidationPipe } from '../pipes/password-grant/password-grant.pipe';
+import { UserPasswordSchema } from '../pipes/validation-schemas/userpassword';
 import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Session as se } from 'express-session';
-import { EncryptionResponseInterceptor } from 'src/encryption-response/encryption-response.interceptor';
+import { EncryptionResponseInterceptor } from '../encryption-response/encryption-response.interceptor';
 
 interface CustomSession extends se {
   accessToken?: string;
@@ -30,7 +30,7 @@ interface RequestWithSession extends Request {
 @UseInterceptors(EncryptionResponseInterceptor)
 @Controller('authenticate')
 export class AuthenticateController {
-  constructor(private readonly authenticateService: AuthenticateService) {}
+  constructor(private readonly authenticateService: AuthService) {}
   @ApiTags('Autenticación')
   @UsePipes(new JoiValidationPipe(UserPasswordSchema))
   @ApiBody({ schema: { example: { user: 'usuario', password: 'contraseña' } } })

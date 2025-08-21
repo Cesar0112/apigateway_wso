@@ -63,6 +63,10 @@
         <label for="ws2ClientSecret">WSO2 CLIENT_SECRET:</label>
         <input type="text" id="ws2ClientSecret" name="ws2ClientSecret">
 
+        <label for="ws2UrlToken">WSO2 URL_TOKEN:</label>
+        <input type="text" id="ws2UrlToken" name="ws2UrlToken">
+
+
         <label for="apiGatewayHost">API_GATEWAY HOST:</label>
         <input type="text" id="apiGatewayHost" name="apiGatewayHost">
 
@@ -105,14 +109,23 @@
         <label for="sessionCookieName">SESSION COOKIE_NAME:</label>
         <input type="text" id="sessionCookieName" name="sessionCookieName">
 
-        <label for="sessionRedisHost">SESSION REDIS_HOST:</label>
-        <input type="text" id="sessionRedisHost" name="sessionRedisHost">
+        <label for="sessionHost">SESSION HOST:</label>
+        <input type="text" id="sessionHost" name="sessionHost">
 
-        <label for="sessionRedisPort">SESSION REDIS_PORT:</label>
-        <input type="number" id="sessionRedisPort" name="sessionRedisPort">
+        <label for="sessionPort">SESSION PORT:</label>
+        <input type="number" id="sessionPort" name="sessionPort">
 
-        <label for="sessionRedisTls">SESSION REDIS_TLS:</label>
-        <input type="checkbox" id="sessionRedisTls" name="sessionRedisTls">
+        <label>SESSION STRATEGY:</label>
+        <input type="radio" id="sessionStrategyRedis" name="sessionStrategy" value="redis">
+        <label for="sessionStrategyRedis">Redis</label>
+        <input type="radio" id="sessionStrategySqlite" name="sessionStrategy" value="sqlite">
+        <label for="sessionStrategySqlite">Sqlite</label>
+
+        <label for="sessionTls">SESSION TLS:</label>
+        <input type="checkbox" id="sessionTls" name="sessionTls">
+
+        <label for="sessionSecure">SESSION SECURE:</label>
+        <input type="checkbox" id="sessionSecure" name="sessionSecure">
 
         <button type="submit">Guardar Configuración</button>
     </form>
@@ -129,6 +142,7 @@
                     API_VERSION: document.getElementById('ws2ApiVersion').value,
                     CLIENT_ID: document.getElementById('ws2ClientId').value,
                     CLIENT_SECRET: document.getElementById('ws2ClientSecret').value,
+                    URL_TOKEN: document.getElementById('ws2UrlToken').value,
                 },
                 API_GATEWAY: {
                     HOST: document.getElementById('apiGatewayHost').value,
@@ -147,9 +161,11 @@
                     SECRET: document.getElementById('sessionSecret').value,
                     TTL_SECONDS: parseInt(document.getElementById('sessionTtlSeconds').value, 10),
                     COOKIE_NAME: document.getElementById('sessionCookieName').value,
-                    REDIS_HOST: document.getElementById('sessionRedisHost').value,
-                    REDIS_PORT: parseInt(document.getElementById('sessionRedisPort').value, 10),
-                    REDIS_TLS: document.getElementById('sessionRedisTls').checked,
+                    HOST: document.getElementById('sessionHost').value,
+                    PORT: parseInt(document.getElementById('sessionPort').value, 10),
+                    TLS: document.getElementById('sessionTls').checked,
+                    SECURE: document.getElementById('sessionSecure').checked,
+                    STRATEGY: document.querySelector('input[name="sessionStrategy"]:checked')?.value,
                 },
             };
 
@@ -178,7 +194,6 @@
             try {
                 const response = await fetch('/apigateway/config');
                 const config = await response.json();
-                console.log(config);
 
                 document.getElementById('nodeEnv').value = config.NODE_ENV;
                 document.getElementById('ws2Host').value = config.WSO2?.HOST;
@@ -186,6 +201,7 @@
                 document.getElementById('ws2ApiVersion').value = config.WSO2?.API_VERSION;
                 document.getElementById('ws2ClientId').value = config.WSO2?.CLIENT_ID;
                 document.getElementById('ws2ClientSecret').value = config.WSO2?.CLIENT_SECRET;
+                document.getElementById('ws2UrlToken').value = config.WSO2?.URL_TOKEN;
                 document.getElementById('apiGatewayHost').value = config.API_GATEWAY?.HOST;
                 document.getElementById('apiGatewayPort').value = config.API_GATEWAY?.PORT;
                 document.getElementById('apiGatewaySessionSecret').value = config.API_GATEWAY?.SESSION_SECRET;
@@ -200,9 +216,17 @@
                 document.getElementById('sessionSecret').value = config.SESSION?.SECRET;
                 document.getElementById('sessionTtlSeconds').value = config.SESSION?.TTL_SECONDS;
                 document.getElementById('sessionCookieName').value = config.SESSION?.COOKIE_NAME;
-                document.getElementById('sessionRedisHost').value = config.SESSION?.REDIS_HOST;
-                document.getElementById('sessionRedisPort').value = config.SESSION?.REDIS_PORT;
-                document.getElementById('sessionRedisTls').checked = config.SESSION?.REDIS_TLS;
+                document.getElementById('sessionHost').value = config.SESSION?.HOST;
+                document.getElementById('sessionPort').value = config.SESSION?.PORT;
+                document.getElementById('sessionTls').checked = config.SESSION?.TLS;
+                document.getElementById('sessionSecure').checked = config.SESSION?.SECURE;
+                if (config.SESSION?.STRATEGY) {
+                    const strategy = config.SESSION.STRATEGY;
+                    const radio = document.querySelector(`input[name="sessionStrategy"][value="${strategy}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                    }
+                }
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error al cargar la configuración');

@@ -1,4 +1,4 @@
-import * as per from 'src/permissions/const';
+import * as per from '../permissions/const';
 
 export class Role {
   id: string;

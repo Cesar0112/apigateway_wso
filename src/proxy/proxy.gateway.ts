@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   WebSocketGateway,
   OnGatewayConnection,
@@ -7,6 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { io as ClientIO } from 'socket.io-client';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
 @WebSocketGateway({
@@ -27,7 +27,7 @@ export class ProxyGateway implements OnGatewayConnection {
     const namespace = socket.nsp.name;
     // Para el namespace raíz
     console.log('Nueva conexión socket:', socket.id, 'namespace:', namespace);
-    const url = this.configService.get<string>('API_URL');
+    const url = this.configService.getConfig().API_GATEWAY?.API_URL;
 
     const backendSocket = ClientIO(url, {
       transports: ['polling', 'websocket', 'webtransport'],

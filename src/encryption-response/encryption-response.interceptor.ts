@@ -7,8 +7,8 @@ import {
 import { Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ConfigService } from 'src/config/config.service';
-import { EncryptionsService } from 'src/encryptions/encryptions.service';
+import { ConfigService } from '../config/config.service';
+import { EncryptionsService } from '../encryptions/encryptions.service';
 
 @Injectable()
 export class EncryptionResponseInterceptor implements NestInterceptor {
@@ -25,7 +25,7 @@ export class EncryptionResponseInterceptor implements NestInterceptor {
 
     // Activar cifrado solo si la contraseña está configurada
     const encryptionEnabled = Boolean(
-      this.cfg.get('API_GATEWAY')?.ENCRYPTION_PASSWORD.trim(),
+      this.cfg.getConfig().API_GATEWAY?.ENCRYPTION_PASSWORD.trim(),
     );
 
     if (encryptionEnabled) {

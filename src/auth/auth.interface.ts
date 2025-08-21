@@ -15,7 +15,7 @@ export interface WSO2TokenResponse {
 
 export interface DecodedToken {
   roles?: string[] | string;
-  scope?: string[];
+  scope?: string[] | string;
   aud?: string | string[];
   azp?: string;
   groups?: string[];

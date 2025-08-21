@@ -9,7 +9,7 @@ export class ConfigController {
 
   @Get()
   getConfig() {
-    return this.configService.config;
+    return this.configService.getConfig();
   }
 
   @Post()

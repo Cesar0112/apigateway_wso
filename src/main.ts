@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from './app/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as morgan from 'morgan';
 import { ConfigService } from './config/config.service';
@@ -28,13 +28,13 @@ async function main() {
   SwaggerModule.setup('apigateway/docs', app, document);
 
   app.enableCors({
-    origin: cfg.get('API_GATEWAY')?.CORS_ORIGIN, // Allow specific origins
+    origin: cfg.getConfig().API_GATEWAY?.CORS_ORIGIN, // Allow specific origins
     exposedHeaders: ['Set-Cookie'],
-    methods: cfg.get('API_GATEWAY')?.HTTP_METHODS_ALLOWED, // Allow specific HTTP methods
+    methods: cfg.getConfig().API_GATEWAY?.HTTP_METHODS_ALLOWED, // Allow specific HTTP methods
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'Origin'], // Allow specific headers
     credentials: true, // Allow credentials
   });
-  const port = cfg.get('API_GATEWAY')?.PORT ?? 3000;
+  const port = cfg.getConfig().API_GATEWAY?.PORT ?? 3000;
   await app.listen(port);
   console.log(
     `🚀 API Gateway listening on http://localhost:${port}/apigateway`,

@@ -4,15 +4,15 @@ import axios from 'axios';
 import * as qs from 'querystring';
 import * as https from 'https';
 import * as jwt from 'jwt-decode';
-import { WSO2TokenResponse, DecodedToken } from './authenticate.interface';
+import { WSO2TokenResponse, DecodedToken } from './auth.interface';
 
 import { EncryptionsService } from '../encryptions/encryptions.service';
-import { PermissionsService } from 'src/permissions/permissions.service';
+import { PermissionsService } from '../permissions/permissions.service';
 import { Agent as HttpsAgent } from 'https';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../config/config.service';
 @Injectable()
-export class AuthenticateService {
+export class AuthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly encryptionsService: EncryptionsService,
@@ -51,7 +51,6 @@ export class AuthenticateService {
         headers,
         httpsAgent: new https.Agent({ rejectUnauthorized: false }), //TODO remove this in production
       });
-      console.log('DecodedToken', response.data);
       const token = response.data.access_token;
       const decodedToken: DecodedToken = jwt.jwtDecode(token);
 

@@ -1,17 +1,17 @@
-import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { SessionConfig } from './session.config';
 import { SessionMiddleware } from './session.middleware';
+import { ConfigModule } from '../config/config.module';
 import { SessionService } from './session.service';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../config/config.service';
 
 @Module({
-  providers: [ConfigService, SessionConfig, SessionMiddleware, SessionService],
-  exports: [SessionMiddleware], // <-- los demás módulos lo reciben
+  imports: [ConfigModule],
+  providers: [SessionConfig, SessionMiddleware, SessionService, ConfigService],
+  exports: [SessionService],
 })
 export class SessionModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(SessionMiddleware) // se monta automáticamente
-      .forRoutes('*path'); // sobre todas las rutas
+    consumer.apply(SessionMiddleware).forRoutes('*');
   }
 }

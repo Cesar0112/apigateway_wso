@@ -2,17 +2,18 @@ import {
   Controller,
   All,
   Req,
-  Res,
-  HttpStatus,
   UseGuards,
+  UseInterceptors,
+  HttpCode,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { ProxyService } from './proxy.service';
 import { Channel } from './proxy.interface';
 import { SessionTokenGuard } from '../guards/session-token.guard';
 import { ProxyGateway } from './proxy.gateway';
 import { AxiosResponse } from 'axios';
 import { ProxyScopeGuard } from './proxy-scope.guard';
+import { EncryptionResponseInterceptor } from '../encryption-response/encryption-response.interceptor';
 
 @Controller('*path')
 @UseGuards(SessionTokenGuard)
@@ -23,31 +24,21 @@ export class ProxyController {
     private readonly gatewayService: ProxyGateway,
   ) {}
 
+  @UseInterceptors(EncryptionResponseInterceptor)
   @All()
-  async handleAllHTTPRequests(@Req() req: Request, @Res() res: Response) {
-    try {
-      //Determinar el canal dinámicamente
-      const channel: Channel =
-        (req.headers['x-channel'] as Channel) || Channel.HTTP;
-      console.log('Petición');
+  @HttpCode(200)
+  async handleAllHTTPRequests(@Req() req: Request): Promise<unknown> {
+    //Determinar el canal dinámicamente
+    const channel: Channel =
+      (req.headers['x-channel'] as Channel) || Channel.HTTP;
 
-      const response: AxiosResponse = await this.proxyService.sendRequest(
-        req.path,
-        req.method,
-        req.body,
-        channel,
-      );
+    const response: AxiosResponse = await this.proxyService.sendRequest(
+      req.path,
+      req.method,
+      req.body,
+      channel,
+    );
 
-      res.status(200).json(response.data);
-      return;
-    } catch (error) {
-      const errorMessage =
-        error && typeof error === 'object' && 'message' in error
-          ? (error as { message: string }).message
-          : 'Internal server error';
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ error: errorMessage });
-    }
+    return response.data;
   }
 }

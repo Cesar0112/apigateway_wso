@@ -62,7 +62,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ ROUTE: JSON.parse(routes) }),
+                    body: JSON.stringify(JSON.parse(routes)),
                 });
 
                 if (response.ok) {

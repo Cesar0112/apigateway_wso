@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { EncryptionsService } from './encryptions.service';
 import { EncryptionsController } from './encryptions.controller';
-import { RedisService } from 'src/redis/redis.service';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../config/config.service';
+import { SessionService } from '../session/session.service';
+import { SessionModule } from '../session/session.module';
 
 @Module({
-  providers: [ConfigService, EncryptionsService, RedisService],
+  providers: [EncryptionsService, ConfigService, SessionService],
+  imports: [SessionModule],
   controllers: [EncryptionsController],
 })
 export class EncryptionsModule {}

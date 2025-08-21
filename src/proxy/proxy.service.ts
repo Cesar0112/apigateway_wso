@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as strategies from '../strategies';
 import { Channel } from './proxy.interface';
 import { AxiosResponse } from 'axios';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class ProxyService {

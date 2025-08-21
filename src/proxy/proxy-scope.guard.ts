@@ -1,13 +1,19 @@
 // src/proxy/proxy-scope.guard.ts
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Inject,
+} from '@nestjs/common';
 import { ProxyConfigService } from './proxy-config.service';
 import { Request } from 'express';
-import { RedisService } from 'src/redis/redis.service';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class ProxyScopeGuard implements CanActivate {
   constructor(
-    private readonly redisService: RedisService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly proxyConfigService: ProxyConfigService,
   ) {}
 
@@ -20,13 +26,14 @@ export class ProxyScopeGuard implements CanActivate {
 
     if (!required.length) return true; // Público
 
-    const sessionData = await this.redisService.get('sess:' + req.sessionID);
+    const sessionData = await this.cacheManager.get<string>(
+      'sess:' + req.sessionID,
+    );
     const userSession: { permissions: string[] } = sessionData
       ? (JSON.parse(sessionData) as { permissions: string[] })
       : { permissions: [] };
 
     const userScopes = userSession.permissions;
-    console.log('userScopes', userScopes);
     return required.every((r) => userScopes.includes(r));
   }
 }
