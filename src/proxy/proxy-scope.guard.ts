@@ -8,13 +8,13 @@ import {
 import { ProxyConfigService } from './proxy-config.service';
 import { Request } from 'express';
 import { Cache } from 'cache-manager';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { SessionService } from 'src/session/session.service';
 
 @Injectable()
 export class ProxyScopeGuard implements CanActivate {
   constructor(
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly proxyConfigService: ProxyConfigService,
+    private readonly sessionService: SessionService,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -25,14 +25,9 @@ export class ProxyScopeGuard implements CanActivate {
     const required = map[key] ?? [];
 
     if (!required.length) return true; // Público
-    let thiskey: string = `sess:uz3LRVNd4Eta2nPV2RpsqRVnmcozzIGx`;
-    const sessionData = await this.cacheManager.get<string>(thiskey);
-    console.log(thiskey === `sess:${req.sessionID}`);
-    const userSession: { permissions: string[] } = sessionData
-      ? (JSON.parse(sessionData) as { permissions: string[] })
-      : { permissions: [] };
+    const sessionData = await this.sessionService.getSession(req.sessionID);
 
-    const userScopes = userSession.permissions;
-    return required.every((r) => userScopes.includes(r));
+    return required.every((r) => sessionData?.permissions.includes(r));
+    return true;
   }
 }

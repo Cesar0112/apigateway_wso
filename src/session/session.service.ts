@@ -6,6 +6,9 @@ import { createClient } from 'redis';
 import { RedisStore } from 'connect-redis';
 import { createKeyv as createKeyvRedis } from '@keyv/redis';
 import { createKeyv as createKeyvSQLite } from '@keyv/sqlite';
+import { SessionData } from './interfaces/session.interface';
+
+//import { SessionData } from './interfaces/session.interface';
 
 @Injectable()
 export class SessionService {
@@ -59,5 +62,18 @@ export class SessionService {
       default:
         return new session.MemoryStore();
     }
+  }
+  getSession(sessionID: string): Promise<SessionData | null> {
+    const store = this.getExpressSessionStore();
+
+    return new Promise((resolve, reject) =>
+      store.get(sessionID, (err, data) =>
+        err ? reject(err) : resolve(data as SessionData | null),
+      ),
+    );
+  }
+  isExpired(session: Record<string, any>): boolean {
+    const expires = session.cookie?.expires;
+    return expires && Date.now() > new Date(expires).getTime();
   }
 }

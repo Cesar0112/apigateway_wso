@@ -1,18 +1,12 @@
 import { Store } from 'express-session';
-interface Cookie {
-  originalMaxAge: number;
-  expires: string;
-  secure: boolean;
-  httpOnly: boolean;
-  path: string;
-  sameSite: string;
-}
+import * as session from 'express-session';
 interface Permissions {
   permissions: string[];
 }
 export interface SessionData {
-  cookie: Cookie;
-  permissions: Permissions;
+  cookie: session.Cookie;
+  permissions: string[];
+  token: string;
 }
 
 export interface ISessionStore {
