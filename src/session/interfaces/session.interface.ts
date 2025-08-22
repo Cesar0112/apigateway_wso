@@ -1,8 +1,5 @@
 import { Store } from 'express-session';
 import * as session from 'express-session';
-interface Permissions {
-  permissions: string[];
-}
 export interface SessionData {
   cookie: session.Cookie;
   permissions: string[];
@@ -41,6 +38,4 @@ export class ExpressStoreAdapter extends Store {
       .then(() => callback?.())
       .catch(callback);
   };
-
-  // Opcional: touch, length, clear… si tu interfaz los incluye
 }

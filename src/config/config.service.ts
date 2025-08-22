@@ -1,15 +1,14 @@
 // config.service.ts
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Config, RoutesConfig } from './config';
-import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ConfigService {
   private config: Config;
   private routes: RoutesConfig;
-  constructor(/*@Inject(CACHE_MANAGER) private cacheManager: Cache*/) {
+  constructor() {
     this.loadConfig();
     this.loadRoutes();
     fs.watchFile(path.resolve('config.json'), () => {

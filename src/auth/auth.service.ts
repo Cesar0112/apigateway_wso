@@ -1,6 +1,5 @@
 // src/auth/auth.service.ts
 import {
-  Inject,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -10,20 +9,17 @@ import * as qs from 'querystring';
 import * as https from 'https';
 import * as jwt from 'jwt-decode';
 import { WSO2TokenResponse, DecodedToken } from './auth.interface';
-
 import { EncryptionsService } from '../encryptions/encryptions.service';
 import { PermissionsService } from '../permissions/permissions.service';
-
 import { ConfigService } from '../config/config.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { SessionService } from 'src/session/session.service';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly encryptionsService: EncryptionsService,
     private readonly permissionsService: PermissionsService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly sessionService: SessionService,
   ) {}
 
   async login(user: string, password: string) {
@@ -112,11 +108,11 @@ export class AuthService {
   }
   async logout(sessionId: string): Promise<void> {
     const revokeUrl =
-      this.configService.get('WSO2')?.REVOKE_URL ||
+      this.configService.getConfig().WSO2?.REVOKE_URL ||
       'https://localhost:9443/oauth2/revoke';
     try {
-      let sessionData: string = (await this.cacheManager.get(sessionId)) ?? '';
-      const token = JSON.parse(sessionData);
+      const { token } = (await this.sessionService.getSession(sessionId)) ?? {};
+
       if (!token) {
         throw new InternalServerErrorException();
       }

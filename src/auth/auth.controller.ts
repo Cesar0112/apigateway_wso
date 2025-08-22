@@ -59,6 +59,7 @@ export class AuthenticateController {
   }
   @ApiTags('Desautenticación')
   @ApiResponse({ status: 200, description: 'Logout exitoso' })
+  @HttpCode(200)
   @Post('logout')
   async logout(
     @Req() req: RequestWithSession,
