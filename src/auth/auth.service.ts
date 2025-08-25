@@ -132,8 +132,9 @@ export class AuthService {
           timeout: 5000, // Set a timeout of 5 seconds
         },
       );
+      this.sessionService.deleteSession(sessionId);
     } catch (error) {
-      console.error('Error revoking access token:', error);
+      throw new InternalServerErrorException(error);
     }
   }
 }

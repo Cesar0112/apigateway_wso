@@ -76,4 +76,17 @@ export class SessionService {
     const expires = session.cookie?.expires;
     return expires && Date.now() > new Date(expires).getTime();
   }
+  deleteSession(sessionId: string): Promise<void> {
+    const store = this.getExpressSessionStore();
+    return new Promise((resolve, reject) =>
+      store.destroy(sessionId, (err) => {
+        if (err) {
+          const error = err instanceof Error ? err : new Error(String(err));
+          reject(error);
+          return;
+        }
+        resolve();
+      }),
+    );
+  }
 }
