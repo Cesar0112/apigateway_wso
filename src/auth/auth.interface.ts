@@ -12,7 +12,10 @@ export interface WSO2TokenResponse {
   error_description?: string;
   error_uri?: string;
 }
-
+export interface SessionTimers {
+  warningTimer?: NodeJS.Timeout;
+  logoutTimer?: NodeJS.Timeout;
+}
 export interface DecodedToken {
   roles?: string[] | string;
   scope?: string[] | string;

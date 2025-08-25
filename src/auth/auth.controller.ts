@@ -19,7 +19,7 @@ import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Session as ExpressSession, SessionData } from 'express-session';
 import { EncryptionResponseInterceptor } from 'src/encryption-response/encryption-response.interceptor';
-
+import * as session from 'express-session';
 interface CustomSession extends ExpressSession {
   accessToken?: string;
   user?: any;
@@ -95,5 +95,10 @@ export class AuthenticateController {
     //console.log('session.id', session.id);
 
     return 'Session and cookies are working';
+  }
+
+  @Post('refresh')
+  refresh(@Session() session: session.Session) {
+    this.authenticateService.refresh(session.id);
   }
 }

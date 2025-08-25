@@ -22,6 +22,14 @@ export class AuthService {
     private readonly sessionService: SessionService,
   ) {}
 
+  async refresh(sessionId: string): Promise<boolean> {
+    const session = await this.sessionService.getSession(sessionId);
+    if (!session) {
+      throw new UnauthorizedException();
+    }
+    return await this.sessionService.refresh(sessionId, session);
+  }
+
   async login(user: string, password: string) {
     try {
       const url: string =
@@ -79,7 +87,7 @@ export class AuthService {
           );
         }
 
-        let permisos: string[] = [];
+        const permisos: string[] = [];
 
         for (const scope of scopes) {
           for (const permission of scope.permissions) {
@@ -102,7 +110,7 @@ export class AuthService {
           message: 'Autenticación exitosa',
         };
       }
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Credenciales inválidas');
     }
   }

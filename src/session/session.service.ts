@@ -33,7 +33,19 @@ export class SessionService {
         return new Keyv();
     }
   }
+  async refresh(sessionID: string, sessionData: SessionData): Promise<boolean> {
+    const store = this.getExpressSessionStore();
 
+    return new Promise((resolve) => {
+      if (typeof store.touch !== 'function') {
+        // If the store doesn't support touch, cannot refresh session TTL.
+        resolve(false);
+        return;
+      }
+
+      store.touch(sessionID, sessionData);
+    });
+  }
   getExpressSessionStore(): session.Store {
     const { STRATEGY, URL } = this.cfg.getConfig().SESSION ?? {
       STRATEGY: 'redis',
@@ -67,13 +79,18 @@ export class SessionService {
     const store = this.getExpressSessionStore();
 
     return new Promise((resolve, reject) =>
-      store.get(sessionID, (err, data) =>
-        err ? reject(err) : resolve(data as SessionData | null),
-      ),
+      store.get(sessionID, (err, data) => {
+        if (err) {
+          const error = err instanceof Error ? err : new Error(String(err));
+          reject(error);
+          return;
+        }
+        resolve(data as SessionData | null);
+      }),
     );
   }
-  isExpired(session: Record<string, any>): boolean {
-    const expires = session.cookie?.expires;
+  isExpired(session: SessionData): boolean {
+    const expires: Date = session.cookie?.expires as Date;
     return expires && Date.now() > new Date(expires).getTime();
   }
   deleteSession(sessionId: string): Promise<void> {
