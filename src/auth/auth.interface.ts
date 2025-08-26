@@ -23,3 +23,10 @@ export interface DecodedToken {
   azp?: string;
   groups?: string[];
 }
+
+export interface IAuthenticationService {
+  login(user: string, password: string): Promise<any>;
+  logout(sessionId: string): Promise<void>;
+  refresh(sessionId: string): Promise<boolean>;
+}
+export const AUTH_SERVICE_TOKEN = Symbol('AUTH_SERVICE');

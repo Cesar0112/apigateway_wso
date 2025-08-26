@@ -8,13 +8,25 @@ import axios from 'axios';
 import * as qs from 'querystring';
 import * as https from 'https';
 import * as jwt from 'jwt-decode';
-import { WSO2TokenResponse, DecodedToken } from './auth.interface';
+import {
+  WSO2TokenResponse,
+  DecodedToken,
+  IAuthenticationService,
+} from './auth.interface';
 import { EncryptionsService } from '../encryptions/encryptions.service';
 import { PermissionsService } from '../permissions/permissions.service';
 import { ConfigService } from '../config/config.service';
 import { SessionService } from 'src/session/session.service';
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthenticationService {
+  test_short(sessionId: string) {
+    const store = this.sessionService.getExpressSessionStore();
+    store.get(sessionId, (err, sess) => {
+      if (!sess) return;
+      sess.cookie.expires = new Date(Date.now() + 30_000);
+      store.set(sessionId, sess);
+    });
+  }
   constructor(
     private readonly configService: ConfigService,
     private readonly encryptionsService: EncryptionsService,

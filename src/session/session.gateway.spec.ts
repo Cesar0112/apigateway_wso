@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SessionGateway } from '../auth/session.gateway';
+import { SessionGateway } from './session.gateway';
 
 describe('SessionGateway', () => {
   let gateway: SessionGateway;

@@ -11,8 +11,9 @@ import {
   BadRequestException,
   InternalServerErrorException,
   Res,
+  Inject,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
+
 import { JoiValidationPipe } from 'src/pipes/password-grant/password-grant.pipe';
 import { UserPasswordSchema } from 'src/pipes/validation-schemas/userpassword';
 import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
@@ -20,6 +21,7 @@ import { Request, Response } from 'express';
 import { Session as ExpressSession, SessionData } from 'express-session';
 import { EncryptionResponseInterceptor } from 'src/encryption-response/encryption-response.interceptor';
 import * as session from 'express-session';
+import { AUTH_SERVICE_TOKEN, IAuthenticationService } from './auth.interface';
 interface CustomSession extends ExpressSession {
   accessToken?: string;
   user?: any;
@@ -33,7 +35,10 @@ interface RequestWithSession extends Request {
 @UseInterceptors(EncryptionResponseInterceptor)
 @Controller('authenticate')
 export class AuthenticateController {
-  constructor(private readonly authenticateService: AuthService) {}
+  constructor(
+    @Inject(AUTH_SERVICE_TOKEN)
+    private readonly authenticateService: IAuthenticationService,
+  ) {}
   @ApiTags('Autenticación')
   @UsePipes(new JoiValidationPipe(UserPasswordSchema))
   @ApiBody({ schema: { example: { user: 'usuario', password: 'contraseña' } } })
@@ -89,14 +94,9 @@ export class AuthenticateController {
     };
   }
   @Get('test')
-  test(@Session() session: Record<string, any>) {
-    session.accessToken = 'hola';
-    // This is just a test endpoint to check if the session and cookies are working
-    //console.log('session.id', session.id);
-
-    return 'Session and cookies are working';
+  shortTtl(@Body('sessionId') sessionId: string) {
+    //this.authenticateService.test_short(sessionId);
   }
-
   @Post('refresh')
   refresh(@Session() session: session.Session) {
     this.authenticateService.refresh(session.id);

@@ -4,37 +4,20 @@ import { SessionMiddleware } from './session.middleware';
 import { ConfigModule } from '../config/config.module';
 import { SessionService } from './session.service';
 import { ConfigService } from '../config/config.service';
-import { SessionGateway } from '../auth/session.gateway';
-import { ScheduleModule } from '@nestjs/schedule';
+import { SessionGateway } from './session.gateway';
+import { SessionTimerService } from './session-timer.service';
 
 @Module({
-  imports: [ConfigModule, ScheduleModule.forRoot()],
+  imports: [ConfigModule],
   providers: [
     SessionConfig,
     SessionMiddleware,
     SessionService,
     ConfigService,
+    SessionTimerService,
     SessionGateway,
-    /*{
-      provide: 'SESSION_STRATEGY',
-      inject: [ConfigService],
-      useFactory: (cfg: ConfigService) => {
-        switch (cfg.getConfig().SESSION?.STRATEGY) {
-          case 'redis':
-            return new RedisSessionStrategy(new Redis());
-
-          default:
-            throw new Error('No session store configured');
-        }
-      },
-    },
-    {
-      provide: SessionRepository,
-      useFactory: (strategy: any) => new SessionRepository(strategy),
-      inject: ['SESSION_STRATEGY'],
-    },*/
   ],
-  exports: [SessionService],
+  exports: [SessionService, SessionTimerService],
 })
 export class SessionModule {
   configure(consumer: MiddlewareConsumer) {

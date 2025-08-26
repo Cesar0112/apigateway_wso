@@ -23,7 +23,7 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
   });
 
-  it('debe retornar Hello World!', async () => {
+  it('Debe retornar el token', async () => {
     expect(
       await service.login(
         'superadmin',
