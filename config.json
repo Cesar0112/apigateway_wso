@@ -11,14 +11,15 @@
   },
   "API_GATEWAY": {
     "HOST": "localhost",
-    "PORT": 10411,
+    "PORT": 10412,
     "SESSION_SECRET": "s3cr3t",
     "PROXY": false,
     "API_URL": "http://10.12.24.205:10410",
     "ENCRYPTION_PASSWORD": "IkIopwlWorpqUj",
     "PROXY_STATIC_MAP_PATH": "./routes.json",
     "CORS_ORIGIN": "http://localhost:8080",
-    "HTTP_METHODS_ALLOWED": "GET,PUT,POST,HEADER,DELETE"
+    "HTTP_METHODS_ALLOWED": "GET,PUT,POST,HEADER,DELETE",
+    "AUTH_TYPE": "wso2"
   },
   "SESSION": {
     "FOLDER": "sessions_dev",

@@ -80,6 +80,10 @@ export class ApiGatewayConfig {
   @IsString()
   @IsOptional()
   HTTP_METHODS_ALLOWED: string = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+
+  @IsIn(['wso2', 'local'])
+  @IsOptional()
+  AUTH_TYPE: string = 'wso2';
 }
 
 export class SessionConfig {
